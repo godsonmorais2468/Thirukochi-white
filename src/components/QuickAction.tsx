@@ -8,6 +8,8 @@ interface QuickActionProps {
   onClick: () => void;
   /** Fills the disc with gold — for the single most-used action in a rail. */
   primary?: boolean;
+  /** Set when the tile sits on the burgundy rail rather than a pale card. */
+  onWine?: boolean;
   className?: string;
 }
 
@@ -21,6 +23,7 @@ export default function QuickAction({
   icon,
   onClick,
   primary = false,
+  onWine = false,
   className = "",
 }: QuickActionProps) {
   const reduced = useReducedMotion();
@@ -33,23 +36,36 @@ export default function QuickAction({
       whileHover={reduced ? undefined : gesture.tile.whileHover}
       whileTap={reduced ? undefined : gesture.tile.whileTap}
       transition={spring.hover}
-      className={`group surface flex h-full min-w-0 flex-col items-center justify-start gap-1.5 rounded-[var(--radius-tile)] px-2 py-3 text-center transition-shadow duration-400 hover:lift-soft sm:gap-2.5 sm:px-3 sm:py-4 ${className}`}
+      className={`group flex h-full min-w-0 flex-col items-center justify-start gap-1.5 rounded-[var(--radius-tile)] px-2 py-3 text-center transition-shadow duration-400 sm:gap-2.5 sm:px-3 sm:py-4 ${
+        onWine ? "bg-[rgba(255,246,224,0.07)]" : "surface hover:lift-soft"
+      } ${className}`}
+      style={onWine ? { border: "1px solid rgba(212,175,55,0.22)" } : undefined}
     >
       <span
         aria-hidden
         className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-transform duration-400 group-hover:scale-105 sm:h-11 sm:w-11 ${
-          primary ? "gold-fill text-wine-900" : "bg-gold-50 text-wine-700"
+          primary
+            ? "gold-fill text-wine-900"
+            : onWine
+              ? "bg-[rgba(255,246,224,0.1)] text-gold-200"
+              : "bg-gold-50 text-wine-700"
         }`}
         style={{
           border: primary ? "none" : "1px solid rgba(212,175,55,0.38)",
           boxShadow: primary
             ? "0 10px 22px -12px rgba(140,105,35,0.7), inset 0 1px 0 rgba(255,255,255,0.5)"
-            : "inset 0 1px 0 rgba(255,255,255,0.8)",
+            : onWine
+              ? "none"
+              : "inset 0 1px 0 rgba(255,255,255,0.8)",
         }}
       >
         {icon}
       </span>
-      <span className="w-full text-[11.5px] leading-tight font-medium break-words hyphens-auto text-ink-soft sm:text-[12px]">
+      <span
+        className={`w-full text-[11.5px] leading-tight font-medium break-words hyphens-auto sm:text-[12px] ${
+          onWine ? "text-gold-100/90" : "text-ink-soft"
+        }`}
+      >
         {label}
       </span>
     </motion.button>

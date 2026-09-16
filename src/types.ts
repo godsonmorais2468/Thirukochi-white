@@ -1,4 +1,4 @@
-export type Screen = "registration" | "otp" | "mpin" | "home";
+export type Screen = "splash" | "registration" | "otp" | "mpin" | "login" | "home";
 
 export interface Account {
   name: string;

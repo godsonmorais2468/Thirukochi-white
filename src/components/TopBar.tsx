@@ -28,9 +28,9 @@ export default function TopBar({
   const reduced = useReducedMotion();
 
   return (
-    <div className="relative z-30 flex items-center justify-between gap-3 px-4 pt-[max(0.65rem,env(safe-area-inset-top))] pb-3 sm:px-5 sm:pt-[max(0.9rem,env(safe-area-inset-top))] sm:pb-4 lg:px-10 lg:pt-6 lg:pb-5">
+    <div className="relative z-30 flex items-center justify-between gap-3 px-4 pt-[max(0.6rem,env(safe-area-inset-top))] pb-2 sm:px-5 sm:pt-[max(0.75rem,env(safe-area-inset-top))] sm:pb-3 lg:px-10 lg:pt-4 lg:pb-2">
       {showLogo ? (
-        <BrandLogo variant="lockup" tone="ink" width={100} sizeClass="w-[84px] sm:w-[100px]" shared />
+        <BrandLogo variant="lockup" tone="ink" width={128} sizeClass="w-[120px] sm:w-[128px]" shared />
       ) : (
         <span aria-hidden />
       )}

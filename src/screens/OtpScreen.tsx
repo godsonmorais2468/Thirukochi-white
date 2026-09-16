@@ -4,7 +4,7 @@ import { Check, ShieldCheck } from "lucide-react";
 import AuthLayout from "../components/AuthLayout";
 import OtpInput from "../components/OtpInput";
 import PremiumButton from "../components/PremiumButton";
-import { MOCK_OTP, OTP_COUNTDOWN, OTP_LENGTH } from "../data/mock";
+import { OTP_COUNTDOWN, OTP_LENGTH } from "../data/mock";
 import { maskPhone } from "../lib/format";
 import { ease, layout } from "../lib/motion";
 
@@ -17,7 +17,6 @@ interface OtpScreenProps {
 type Status = "idle" | "error" | "verified";
 
 export default function OtpScreen({ phone, onVerified, onBack }: OtpScreenProps) {
-  const [code, setCode] = useState("");
   const [status, setStatus] = useState<Status>("idle");
   const [seconds, setSeconds] = useState(OTP_COUNTDOWN);
   const [fieldKey, setFieldKey] = useState(0);
@@ -35,20 +34,16 @@ export default function OtpScreen({ phone, onVerified, onBack }: OtpScreenProps)
     return () => pending.forEach(window.clearTimeout);
   }, []);
 
-  const verify = (value: string) => {
-    if (value.length < OTP_LENGTH) return;
-    if (value === MOCK_OTP) {
-      setStatus("verified");
-      timeouts.current.push(window.setTimeout(onVerified, 900));
-    } else {
-      setStatus("error");
-    }
+  /* Prototype: any code passes, and so does no code at all. */
+  const verify = () => {
+    if (status === "verified") return;
+    setStatus("verified");
+    timeouts.current.push(window.setTimeout(onVerified, 750));
   };
 
   const resend = () => {
     if (seconds > 0) return;
     setSeconds(OTP_COUNTDOWN);
-    setCode("");
     setStatus("idle");
     setFieldKey((key) => key + 1);
   };
@@ -74,8 +69,7 @@ export default function OtpScreen({ phone, onVerified, onBack }: OtpScreenProps)
         key={fieldKey}
         length={OTP_LENGTH}
         status={status}
-        onChange={(value) => {
-          setCode(value);
+        onChange={() => {
           if (status === "error") setStatus("idle");
         }}
         onComplete={verify}
@@ -84,19 +78,6 @@ export default function OtpScreen({ phone, onVerified, onBack }: OtpScreenProps)
 
       <div className="mt-3.5 min-h-[17px]">
         <AnimatePresence mode="wait">
-          {status === "error" && (
-            <motion.p
-              key="error"
-              role="alert"
-              initial={{ opacity: 0, y: -4 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.28, ease: ease.silk }}
-              className="text-[13px] text-negative"
-            >
-              That code doesn&apos;t match. For this demo, use {MOCK_OTP}.
-            </motion.p>
-          )}
           {status === "verified" && (
             <motion.p
               key="verified"
@@ -152,8 +133,8 @@ export default function OtpScreen({ phone, onVerified, onBack }: OtpScreenProps)
       <div className="pt-[clamp(18px,2.8vh,26px)]">
         <PremiumButton
           layoutId={layout.primaryAction}
-          onClick={() => verify(code)}
-          disabled={code.length < OTP_LENGTH || status === "verified"}
+          onClick={verify}
+          disabled={status === "verified"}
           size="lg"
           icon={<ShieldCheck size={15} strokeWidth={1.8} />}
         >

@@ -15,17 +15,18 @@ export default function RegistrationScreen({ onContinue }: RegistrationScreenPro
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [remember, setRemember] = useState(true);
-  const [submitted, setSubmitted] = useState(false);
 
-  const nameError = name.trim().length < 2 ? "Enter your full name as on your records." : undefined;
-  const digits = phone.replace(/\D/g, "");
-  const phoneError = digits.length !== 10 ? "A 10-digit Indian mobile number is required." : undefined;
-  const valid = !nameError && !phoneError;
-
+  /*
+    Prototype: nothing is validated. An empty form still walks through to the
+    code screen, with stand-in details so the rest of the app has something to
+    greet and mask.
+  */
   const submit = () => {
-    setSubmitted(true);
-    if (!valid) return;
-    onContinue({ name: name.trim(), phone: digits });
+    const digits = phone.replace(/\D/g, "");
+    onContinue({
+      name: name.trim() || "Guest",
+      phone: digits || "9876543210",
+    });
   };
 
   return (
@@ -53,7 +54,6 @@ export default function RegistrationScreen({ onContinue }: RegistrationScreenPro
           onChange={setName}
           autoComplete="name"
           icon={<User size={17} strokeWidth={1.6} />}
-          error={submitted ? nameError : undefined}
         />
         <TextField
           label="Mobile Number"
@@ -64,7 +64,6 @@ export default function RegistrationScreen({ onContinue }: RegistrationScreenPro
           autoComplete="tel"
           maxLength={15}
           icon={<Phone size={17} strokeWidth={1.6} />}
-          error={submitted ? phoneError : undefined}
         />
 
         <div className="pt-1">

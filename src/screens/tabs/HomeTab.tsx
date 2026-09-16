@@ -140,38 +140,44 @@ export default function HomeTab({ name, onOpenSchemes, onNavigate }: HomeTabProp
 
         {/* Quick actions sit on their own glass rail */}
         <BentoPanel className="lg:col-span-12" tilt={false}>
-          <PremiumCard padded={false} className="px-3.5 py-3.5 sm:px-5 sm:py-4">
+          <PremiumCard tone="wine" padded={false} className="px-3.5 py-3.5 sm:px-5 sm:py-4">
             <motion.div
               variants={staggerTight}
               className="grid grid-cols-3 gap-2 sm:gap-3 lg:grid-cols-6"
             >
               <QuickAction
                 primary
+                onWine
                 label="Join Scheme"
                 icon={<CalendarPlus size={19} strokeWidth={1.7} />}
                 onClick={() => onNavigate("join")}
               />
               <QuickAction
+                onWine
                 label="Make Payment"
                 icon={<Receipt size={19} strokeWidth={1.6} />}
                 onClick={() => onNavigate("payments")}
               />
               <QuickAction
+                onWine
                 label="View Wallet"
                 icon={<WalletIcon size={19} strokeWidth={1.6} />}
                 onClick={() => onNavigate("wallet")}
               />
               <QuickAction
+                onWine
                 label="Gold Schemes"
                 icon={<Gem size={19} strokeWidth={1.6} />}
                 onClick={onOpenSchemes}
               />
               <QuickAction
+                onWine
                 label="Refer & Earn"
                 icon={<Gift size={19} strokeWidth={1.6} />}
                 onClick={() => onNavigate("wallet")}
               />
               <QuickAction
+                onWine
                 label="My Profile"
                 icon={<UserRound size={19} strokeWidth={1.6} />}
                 onClick={() => onNavigate("profile")}

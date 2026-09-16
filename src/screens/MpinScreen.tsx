@@ -55,20 +55,10 @@ export default function MpinScreen({ onComplete }: MpinScreenProps) {
               setStep("confirm");
             }, 340);
           } else {
+            /* Prototype: the confirmation is not checked against the first. */
             schedule(() => {
-              if (next === firstRef.current) {
-                setStep("done");
-                schedule(onComplete, 1000);
-              } else {
-                setError(true);
-                schedule(() => {
-                  setPin("");
-                  setFirst("");
-                  firstRef.current = "";
-                  setStep("set");
-                  setError(false);
-                }, 1000);
-              }
+              setStep("done");
+              schedule(onComplete, 900);
             }, 240);
           }
         }
@@ -160,6 +150,16 @@ export default function MpinScreen({ onComplete }: MpinScreenProps) {
         <div className="w-full pt-[clamp(12px,2vh,20px)]">
           <MpinKeypad onDigit={handleDigit} onBackspace={handleBackspace} disabled={step === "done"} />
         </div>
+
+        {/* Prototype: a way past the keypad without setting anything. */}
+        <button
+          type="button"
+          onClick={onComplete}
+          disabled={step === "done"}
+          className="tap-area mt-3 text-[11.5px] font-medium tracking-luxe-sm uppercase text-wine-700 transition-opacity disabled:opacity-30"
+        >
+          Skip for now
+        </button>
       </div>
     </AuthLayout>
   );

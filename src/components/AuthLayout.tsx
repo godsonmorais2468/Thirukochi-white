@@ -108,7 +108,13 @@ export default function AuthLayout({
           variants={stagger}
           initial="initial"
           animate="animate"
-          className="mx-auto flex min-h-0 w-full max-w-[520px] flex-1 flex-col items-center justify-center gap-[clamp(10px,1.8vh,24px)]"
+          /*
+            `min-h-full` rather than `flex-1`: a flex child that is told to
+            fill its parent cannot grow past it, so on a short screen the card
+            overflowed and the column had nothing to scroll. This centres while
+            there is room and grows — and scrolls — when there is not.
+          */
+          className="mx-auto flex min-h-full w-full max-w-[520px] shrink-0 flex-col items-center justify-center gap-[clamp(10px,1.8vh,24px)] py-1"
         >
           {/* Brand, standing on the set above the card */}
           <motion.div variants={rise} className="flex shrink-0 flex-col items-center">

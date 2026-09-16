@@ -7,6 +7,7 @@ import Modal from "../components/Modal";
 import PremiumButton from "../components/PremiumButton";
 import SchemeCard from "../components/SchemeCard";
 import ScreenTransition from "../components/ScreenTransition";
+import SuccessOverlay from "../components/SuccessOverlay";
 import TopBar from "../components/TopBar";
 import HomeTab from "./tabs/HomeTab";
 import JoinSchemeTab from "./tabs/JoinSchemeTab";
@@ -30,6 +31,7 @@ interface HomeScreenProps {
 export default function HomeScreen({ name, phone, onSignOut }: HomeScreenProps) {
   const [sheet, setSheet] = useState<Sheet>("none");
   const [tab, setTab] = useState<NavKey>("home");
+  const [subscribed, setSubscribed] = useState<{ scheme: string; detail: string } | null>(null);
   const scroller = useRef<HTMLDivElement>(null);
   const toast = useToast();
   // Only one logo may claim the shared layoutId, so the hidden one is not rendered.
@@ -60,7 +62,7 @@ export default function HomeScreen({ name, phone, onSignOut }: HomeScreenProps) 
 
         <div
           ref={scroller}
-          className="no-scrollbar scroll-smooth-y min-h-0 flex-1 overflow-y-auto px-5 pb-32 pt-5 sm:px-6 lg:px-10 lg:pb-14 lg:pt-7 xl:px-14"
+          className="no-scrollbar scroll-smooth-y min-h-0 flex-1 overflow-y-auto px-4 pb-28 pt-1 sm:px-6 sm:pb-32 lg:px-10 lg:pb-14 lg:pt-2 xl:px-14"
         >
           <div className="mx-auto w-full max-w-[1180px] 2xl:max-w-[1320px]">
             <AnimatePresence mode="wait">
@@ -72,7 +74,7 @@ export default function HomeScreen({ name, phone, onSignOut }: HomeScreenProps) 
                     onNavigate={setTab}
                   />
                 )}
-                {tab === "join" && <JoinSchemeTab onJoined={() => setTab("payments")} />}
+                {tab === "join" && <JoinSchemeTab onJoined={setSubscribed} />}
                 {tab === "wallet" && <WalletTab onNavigate={setTab} />}
                 {tab === "payments" && <PaymentsTab onNavigate={setTab} />}
                 {tab === "profile" && <ProfileTab name={name} phone={phone} onSignOut={onSignOut} />}
@@ -83,6 +85,17 @@ export default function HomeScreen({ name, phone, onSignOut }: HomeScreenProps) 
 
         <BottomNavigation active={tab} className="lg:hidden" onChange={setTab} />
       </div>
+
+      <SuccessOverlay
+        open={Boolean(subscribed)}
+        title={`${subscribed?.scheme ?? ""} subscribed`}
+        detail={subscribed?.detail}
+        onDone={() => {
+          setSubscribed(null);
+          setTab("payments");
+          toast({ title: `${subscribed?.scheme ?? "Scheme"} subscribed`, detail: subscribed?.detail });
+        }}
+      />
 
       <Modal
         open={sheet === "schemes"}

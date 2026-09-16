@@ -21,8 +21,14 @@ function ProgressRing({ paid, total }: { paid: number; total: number }) {
   const reduced = useReducedMotion();
   const ratio = paid / total;
 
+  /*
+    The caption sits under the circle rather than inside it. At the mobile ring
+    size the word is wider than the ring, so in the centre it ran across the
+    gold arc and crowded the figures in the next column.
+  */
   return (
-    <div className="relative flex h-[92px] w-[92px] shrink-0 items-center justify-center sm:h-[136px] sm:w-[136px] lg:h-[150px] lg:w-[150px]">
+    <div className="flex shrink-0 flex-col items-center gap-1.5">
+      <div className="relative flex h-[92px] w-[92px] items-center justify-center sm:h-[136px] sm:w-[136px] lg:h-[150px] lg:w-[150px]">
       <svg viewBox="0 0 128 128" className="h-full w-full -rotate-90" fill="none" aria-hidden>
         <defs>
           <linearGradient id="ring-gold" x1="0" y1="0" x2="1" y2="1">
@@ -46,13 +52,17 @@ function ProgressRing({ paid, total }: { paid: number; total: number }) {
         />
       </svg>
 
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <p className="font-display text-[20px] leading-none text-ink sm:text-[30px]">
+      <div className="absolute inset-0 flex items-center justify-center">
+        <p className="font-display text-[22px] leading-none text-ink sm:text-[32px]">
           {paid}
-          <span className="text-[12px] text-muted-soft sm:text-[17px]">/{total}</span>
+          <span className="text-[13px] text-muted-soft sm:text-[18px]">/{total}</span>
         </p>
-        <p className="mt-1 text-[10px] font-medium tracking-luxe uppercase text-gold-700 sm:mt-1.5 sm:text-[11px]">Instalments</p>
       </div>
+      </div>
+
+      <p className="text-[10px] font-medium tracking-luxe-sm uppercase text-gold-700 sm:text-[11px] sm:tracking-luxe">
+        Instalments
+      </p>
     </div>
   );
 }
@@ -70,7 +80,7 @@ export default function GoldJourney({ onExplore, onPay, className = "" }: GoldJo
     <PremiumCard tone="cream" padded={false} sheenDelay={2.4} className={className}>
       <div className="flex flex-col gap-4 p-4 sm:gap-6 sm:p-7 lg:p-8">
         {/* Where the plan stands */}
-        <div className="flex items-center gap-3 sm:gap-7">
+        <div className="flex items-center gap-4 sm:gap-7">
           <ProgressRing paid={scheme.paid} total={scheme.total} />
 
           <div className="min-w-0">

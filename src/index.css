@@ -57,6 +57,19 @@
     -webkit-tap-highlight-color: transparent;
   }
 
+  /*
+    Kills the 300ms tap delay phones add while they wait to see if a tap is a
+    double-tap-to-zoom. Every control in the app responds on the first touch.
+  */
+  button,
+  a,
+  label,
+  [role="button"],
+  [role="radio"],
+  [role="checkbox"] {
+    touch-action: manipulation;
+  }
+
   html {
     background-color: var(--color-ivory);
   }

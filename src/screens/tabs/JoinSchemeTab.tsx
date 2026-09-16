@@ -10,10 +10,10 @@ import SchemeCard from "../../components/SchemeCard";
 import { formatRupees } from "../../lib/format";
 import { joinScheme, schemes } from "../../data/mock";
 import { ease, rise, spring, stagger, staggerTight } from "../../lib/motion";
-import { useToast } from "../../hooks/useToasts";
 
 interface JoinSchemeTabProps {
-  onJoined: () => void;
+  /** Hands the subscription up so the celebration can cover the whole screen. */
+  onJoined: (summary: { scheme: string; detail: string }) => void;
 }
 
 /** Numbered step marker, so a three-part form still reads as a single path. */
@@ -53,25 +53,20 @@ export default function JoinSchemeTab({ onJoined }: JoinSchemeTabProps) {
   const [nomineeName, setNomineeName] = useState("");
   const [remarks, setRemarks] = useState("");
   const [agreed, setAgreed] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
-  const toast = useToast();
 
   const amountValue = Number(amount.replace(/\D/g, ""));
-  const schemeError = !scheme ? "Choose a scheme to continue." : undefined;
-  const amountError = !amountValue
-    ? "Enter a monthly amount."
-    : amountValue < 1000
-      ? "Minimum ₹1,000 per month."
-      : undefined;
-  const ready = !schemeError && !amountError && agreed;
+  /* Prototype: nothing is required, but a filled form still reads as ready. */
+  const ready = Boolean(scheme) && amountValue > 0 && agreed;
   const tenure = scheme ? joinScheme.tenures[scheme] : undefined;
 
-  const submit = () => {
-    setSubmitted(true);
-    if (!ready) return;
-    toast({ title: `${scheme} subscribed`, detail: `${formatRupees(amountValue)} every month` });
-    onJoined();
-  };
+  /* Prototype: nothing is required — the seal plays, then the ledger opens. */
+  const submit = () =>
+    onJoined({
+      scheme: scheme || "Your scheme",
+      detail: amountValue
+        ? `${formatRupees(amountValue)} every month${tenure ? ` for ${tenure}` : ""}`
+        : "Your plan is active. Instalments begin next month.",
+    });
 
   return (
     <motion.div variants={stagger} initial="initial" animate="animate" className="flex flex-col gap-5 sm:gap-7 lg:gap-9">
@@ -112,17 +107,6 @@ export default function JoinSchemeTab({ onJoined }: JoinSchemeTabProps) {
                 />
               ))}
             </motion.div>
-
-            {submitted && schemeError && (
-              <motion.p
-                role="alert"
-                initial={{ opacity: 0, y: -4 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mt-3 text-[13px] text-negative"
-              >
-                {schemeError}
-              </motion.p>
-            )}
           </motion.section>
 
           {/* Step 2 — the amount */}
@@ -130,12 +114,7 @@ export default function JoinSchemeTab({ onJoined }: JoinSchemeTabProps) {
             <StepMark index={2} label="Monthly amount" required />
 
             <div className="mt-4">
-              <div
-                className={`flex h-[52px] items-center gap-2 ${fieldClass}`}
-                style={{
-                  borderColor: submitted && amountError ? "rgba(176,59,54,0.55)" : undefined,
-                }}
-              >
+              <div className={`flex h-[52px] items-center gap-2 ${fieldClass}`}>
                 <span className="text-[19px] font-semibold text-gold-600">₹</span>
                 <input
                   value={amount}
@@ -175,12 +154,6 @@ export default function JoinSchemeTab({ onJoined }: JoinSchemeTabProps) {
                   );
                 })}
               </div>
-
-              {submitted && amountError && (
-                <p role="alert" className="mt-3 text-[13px] text-negative">
-                  {amountError}
-                </p>
-              )}
             </div>
           </PremiumCard>
 
@@ -285,12 +258,6 @@ export default function JoinSchemeTab({ onJoined }: JoinSchemeTabProps) {
               <Checkbox checked={agreed} onChange={setAgreed}>
                 I agree to the scheme terms and conditions
               </Checkbox>
-
-              {submitted && !agreed && (
-                <p role="alert" className="mt-2 pl-9 text-[13px] text-negative">
-                  Please accept the terms to continue.
-                </p>
-              )}
             </div>
 
             <motion.div
