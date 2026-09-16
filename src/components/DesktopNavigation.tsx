@@ -89,15 +89,21 @@ export default function DesktopNavigation({
         <LeafMotif />
 
         {/*
-          Centred. The lockup is a fixed 152px inside a rail about 220px wide,
-          so left-aligned it sat well off the rail's axis while everything
-          under it — the plates, the house line — reads from the middle.
+          Centred both ways. The lockup is a fixed 152px inside a rail about
+          220px wide, so left-aligned it sat well off the rail's axis. Pinned
+          flush to the top edge it also read as a letterhead rather than a
+          mark set apart — a `clamp` height gives it a header zone of its own
+          to sit in the middle of, capped so a short window never pushes the
+          nav list or the footer out of the rail.
         */}
-        <div className="relative z-10 flex justify-center px-1">
-          {showLogo && <BrandLogo variant="lockup" tone="light" width={152} shared />}
+        <div
+          className="relative z-10 flex items-center justify-center px-1"
+          style={{ height: "clamp(160px,26vh,280px)" }}
+        >
+          {showLogo && <BrandLogo variant="lockup" tone="light" width={198} shared />}
         </div>
 
-        <nav aria-label="Primary" className="relative z-10 mt-11 flex flex-col gap-1.5">
+        <nav aria-label="Primary" className="relative z-10 mt-4 flex flex-col gap-1.5">
           {navItems.map(({ key, label, icon: Icon }) => {
             const isActive = key === active;
 

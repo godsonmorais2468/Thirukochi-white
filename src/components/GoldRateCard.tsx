@@ -5,6 +5,7 @@ import GoldBadge from "./GoldBadge";
 import GoldRateChart from "./GoldRateChart";
 import PremiumCard from "./PremiumCard";
 import RollingNumber from "./RollingNumber";
+import { useIsTouch } from "../hooks/useMediaQuery";
 import { formatRupeesExact } from "../lib/format";
 import { goldRate } from "../data/mock";
 import { spring } from "../lib/motion";
@@ -12,6 +13,16 @@ import { spring } from "../lib/motion";
 /** Ingot motif, drawn in line-gold — the old rotating dial was too busy for cream. */
 function IngotMotif() {
   const reduced = useReducedMotion();
+  /*
+    Four infinite Framer (JS, rAF-driven) animations live in this one motif —
+    the float plus three staggered sparkles — on top of everything else this
+    card already runs on a timer. Each is individually cheap; on a phone,
+    stacked with the rest of the screen's own decoration, they are part of
+    what adds up to "laggy". A coarse pointer never sees this motif's
+    intended context (a cursor drifting past it), so it holds still there.
+  */
+  const touch = useIsTouch();
+  const still = reduced || touch;
 
   return (
     <motion.svg
@@ -19,7 +30,7 @@ function IngotMotif() {
       viewBox="0 0 160 160"
       fill="none"
       className="pointer-events-none absolute -right-4 -top-6 hidden h-36 w-36 opacity-[0.42] sm:block sm:h-40 sm:w-40 lg:-right-12 lg:top-auto lg:bottom-[-18px] lg:h-40 lg:w-40"
-      animate={reduced ? undefined : { y: [0, -6, 0] }}
+      animate={still ? undefined : { y: [0, -6, 0] }}
       transition={{ duration: 11, repeat: Infinity, ease: "easeInOut" }}
     >
       <defs>
@@ -43,7 +54,7 @@ function IngotMotif() {
           key={i}
           d={`M${x} ${y - 7} L${x + 1.8} ${y - 1.8} L${x + 7} ${y} L${x + 1.8} ${y + 1.8} L${x} ${y + 7} L${x - 1.8} ${y + 1.8} L${x - 7} ${y} L${x - 1.8} ${y - 1.8} Z`}
           fill="rgba(212,175,55,0.55)"
-          animate={reduced ? undefined : { opacity: [0.25, 0.9, 0.25], scale: [0.9, 1.05, 0.9] }}
+          animate={still ? undefined : { opacity: [0.25, 0.9, 0.25], scale: [0.9, 1.05, 0.9] }}
           transition={{ duration: 4.5, delay: i * 1.3, repeat: Infinity, ease: "easeInOut" }}
           style={{ transformOrigin: `${x}px ${y}px` }}
         />
@@ -66,9 +77,19 @@ export default function GoldRateCard() {
   const active = goldRate.options.find((option) => option.id === selected) ?? goldRate.options[0];
   const falling = active.change < 0;
   const reduced = useReducedMotion();
+  const touch = useIsTouch();
 
+  /*
+    Every automatic tick remounts `RollingNumber` (it is keyed on `active.id`),
+    which replays the full digit-drum roll for every character in the price —
+    real, repeated Framer animation work, on a timer, whether anyone is
+    looking or not. On a phone that is the single heaviest thing on this
+    screen firing every 4.2 seconds forever, and it is pure decoration: the
+    purity chips underneath do the same job on a tap. Touch devices keep the
+    chips, lose the clock.
+  */
   useEffect(() => {
-    if (reduced) return;
+    if (reduced || touch) return;
     const timer = window.setInterval(() => {
       setSelected((current) => {
         const index = goldRate.options.findIndex((option) => option.id === current);
@@ -76,46 +97,51 @@ export default function GoldRateCard() {
       });
     }, CYCLE_MS);
     return () => window.clearInterval(timer);
-  }, [reduced]);
+  }, [reduced, touch]);
 
   return (
     <PremiumCard tone="gilt" padded={false} sheenDelay={0} className="overflow-hidden">
-      <div className="relative grid gap-3 p-4 sm:gap-6 sm:p-7 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:items-center lg:gap-12 lg:p-8">
+      <div className="relative grid gap-2 p-3 sm:gap-6 sm:p-7 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:items-center lg:gap-12 lg:p-8">
         {/* The number */}
         <div className="relative min-w-0">
           <IngotMotif />
-          <div className="flex flex-wrap items-center gap-2.5">
-            <p className="text-[11px] font-medium tracking-luxe uppercase text-gold-700">Today&apos;s gold rate</p>
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="text-[10px] font-medium tracking-luxe uppercase text-gold-700 sm:text-[11px]">Today&apos;s gold rate</p>
             <GoldBadge live>Live</GoldBadge>
           </div>
 
-          <p className="mt-2 font-display text-[clamp(30px,9vw,52px)] leading-[0.95] text-ink sm:mt-5 sm:text-[clamp(34px,10vw,52px)]">
+          <p className="mt-1.5 font-display text-[clamp(24px,7.5vw,52px)] leading-[0.95] text-ink sm:mt-5 sm:text-[clamp(34px,10vw,52px)]">
             <RollingNumber key={active.id} value={formatRupeesExact(active.price)} delay={0.25} />
           </p>
 
-          <div className="mt-2 flex flex-wrap items-center gap-2 sm:mt-4">
-            <span className="rounded-full border border-line bg-pearl/70 px-3 py-1.5 text-[12px] font-medium tracking-luxe-sm uppercase text-muted">
+          <div className="mt-1.5 flex flex-wrap items-center gap-1.5 sm:mt-4 sm:gap-2">
+            <span className="rounded-full border border-line bg-pearl/70 px-2.5 py-1 text-[10.5px] font-medium tracking-luxe-sm uppercase text-muted sm:px-3 sm:py-1.5 sm:text-[12px]">
               {active.unit} · {active.karat}
             </span>
             <span
-              className={`inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-[13px] font-medium ${
+              className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-medium sm:px-3 sm:py-1.5 sm:text-[13px] ${
                 falling
                   ? "bg-[rgba(176,59,54,0.08)] text-negative"
                   : "bg-[rgba(44,122,86,0.08)] text-positive"
               }`}
             >
               {falling ? (
-                <ArrowDownRight size={13} strokeWidth={2} />
+                <ArrowDownRight size={12} strokeWidth={2} className="sm:hidden" />
               ) : (
-                <ArrowUpRight size={13} strokeWidth={2} />
+                <ArrowUpRight size={12} strokeWidth={2} className="sm:hidden" />
+              )}
+              {falling ? (
+                <ArrowDownRight size={13} strokeWidth={2} className="hidden sm:block" />
+              ) : (
+                <ArrowUpRight size={13} strokeWidth={2} className="hidden sm:block" />
               )}
               ₹{Math.abs(active.change).toFixed(2)}
               <span className="font-normal opacity-70">vs last update</span>
             </span>
           </div>
 
-          <p className="mt-2 flex items-center gap-1.5 text-[12px] font-medium text-muted sm:mt-4 sm:text-[12.5px]">
-            <Clock3 size={12} strokeWidth={1.6} className="text-gold-600" />
+          <p className="mt-1.5 flex items-center gap-1.5 text-[10.5px] font-medium text-muted sm:mt-4 sm:text-[12.5px]">
+            <Clock3 size={11} strokeWidth={1.6} className="shrink-0 text-gold-600 sm:h-3 sm:w-3" />
             Quoted {goldRate.quotedOn} · {goldRate.quotedAt}
           </p>
         </div>
@@ -123,19 +149,19 @@ export default function GoldRateCard() {
         {/* The movement */}
         <div className="min-w-0">
           <div className="flex items-baseline justify-between gap-3">
-            <p className="text-[11px] font-medium tracking-luxe uppercase text-gold-700">Recent movement</p>
-            <p className="text-[11.5px] font-medium text-muted-soft">Last 13 updates</p>
+            <p className="text-[10px] font-medium tracking-luxe uppercase text-gold-700 sm:text-[11px]">Recent movement</p>
+            <p className="text-[10.5px] font-medium text-muted-soft sm:text-[11.5px]">Last 13 updates</p>
           </div>
 
           <GoldRateChart
             samples={goldRate.movement}
             seriesKey={active.id}
-            className="mt-2 h-[56px] sm:h-[96px] lg:h-[110px]"
+            className="mt-1.5 h-[42px] sm:mt-2 sm:h-[96px] lg:h-[110px]"
           />
 
           {/* Purity selector */}
           <div
-            className="mt-3 flex gap-1.5 rounded-full border border-line bg-pearl/80 p-1 sm:mt-5"
+            className="mt-2 flex gap-1 rounded-full border border-line bg-pearl/80 p-1 sm:mt-5 sm:gap-1.5"
             role="group"
             aria-label="Gold weight and purity"
           >
@@ -166,7 +192,7 @@ export default function GoldRateCard() {
             })}
           </div>
 
-          <p className="mt-2 text-[11.5px] font-medium text-muted-soft sm:mt-3 sm:text-[12px]">{goldRate.footnote}</p>
+          <p className="mt-1.5 text-[10px] font-medium text-muted-soft sm:mt-3 sm:text-[12px]">{goldRate.footnote}</p>
         </div>
       </div>
     </PremiumCard>

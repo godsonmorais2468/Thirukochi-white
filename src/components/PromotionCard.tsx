@@ -2,6 +2,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { promos } from "../data/mock";
+import { useIsTouch } from "../hooks/useMediaQuery";
 import { useToast } from "../hooks/useToasts";
 import { ease, rise, spring } from "../lib/motion";
 
@@ -19,16 +20,24 @@ interface PromotionCardProps {
 export default function PromotionCard({ className = "" }: PromotionCardProps) {
   const [index, setIndex] = useState(0);
   const reduced = useReducedMotion();
+  /*
+    Same reasoning as the gold rate card's clock: an automatic tick here
+    crossfades a background photo, a heading and a body paragraph, all timed
+    together, on an endless 6.5s loop, whether the tab is in view or not. It
+    is chrome, not information — the dots below switch it by hand — so touch
+    devices keep the card still and let a tap drive it instead.
+  */
+  const touch = useIsTouch();
   const toast = useToast();
   const promo = promos[index];
 
   useEffect(() => {
-    if (reduced) return;
+    if (reduced || touch) return;
     const timer = window.setInterval(() => {
       setIndex((current) => (current + 1) % promos.length);
     }, ROTATE_MS);
     return () => window.clearInterval(timer);
-  }, [reduced]);
+  }, [reduced, touch]);
 
   return (
     <motion.div

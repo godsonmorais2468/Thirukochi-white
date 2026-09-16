@@ -137,10 +137,10 @@ export default function HomeTab({ name, onOpenSchemes, onNavigate }: HomeTabProp
 
         {/* Quick actions sit on their own glass rail */}
         <BentoPanel className="lg:col-span-12" tilt={false}>
-          <PremiumCard tone="wine" padded={false} className="px-3.5 py-3.5 sm:px-5 sm:py-4">
+          <PremiumCard tone="wine" padded={false} className="px-2.5 py-2.5 sm:px-5 sm:py-4">
             <motion.div
               variants={staggerTight}
-              className="grid grid-cols-3 gap-2 sm:gap-3 lg:grid-cols-6"
+              className="grid grid-cols-3 gap-1.5 sm:gap-3 lg:grid-cols-6"
             >
               <QuickAction
                 primary

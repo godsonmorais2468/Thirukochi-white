@@ -36,14 +36,14 @@ export default function QuickAction({
       whileHover={reduced ? undefined : gesture.tile.whileHover}
       whileTap={reduced ? undefined : gesture.tile.whileTap}
       transition={spring.hover}
-      className={`group flex h-full min-w-0 flex-col items-center justify-start gap-1.5 rounded-[var(--radius-tile)] px-2 py-3 text-center transition-shadow duration-400 sm:gap-2.5 sm:px-3 sm:py-4 ${
+      className={`group flex h-full min-w-0 flex-col items-center justify-start gap-1 rounded-[var(--radius-tile)] px-1.5 py-2 text-center transition-shadow duration-400 sm:gap-2.5 sm:px-3 sm:py-4 ${
         onWine ? "bg-[rgba(255,246,224,0.07)]" : "surface hover:lift-soft"
       } ${className}`}
       style={onWine ? { border: "1px solid rgba(212,175,55,0.22)" } : undefined}
     >
       <span
         aria-hidden
-        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-transform duration-400 group-hover:scale-105 sm:h-11 sm:w-11 ${
+        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-transform duration-400 group-hover:scale-105 sm:h-11 sm:w-11 ${
           primary
             ? "gold-fill text-wine-900"
             : onWine
@@ -62,7 +62,7 @@ export default function QuickAction({
         {icon}
       </span>
       <span
-        className={`w-full text-[11.5px] leading-tight font-medium break-words hyphens-auto sm:text-[12px] ${
+        className={`w-full text-[10px] leading-tight font-medium break-words hyphens-auto sm:text-[12px] ${
           onWine ? "text-gold-100/90" : "text-ink-soft"
         }`}
       >

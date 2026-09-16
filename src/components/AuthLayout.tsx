@@ -2,7 +2,6 @@ import { motion, useReducedMotion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import type { ReactNode } from "react";
 import BrandLogo from "./BrandLogo";
-import ScreenTransition from "./ScreenTransition";
 import { ease, rise, stagger } from "../lib/motion";
 
 interface AuthLayoutProps {
@@ -72,11 +71,40 @@ export default function AuthLayout({
 }: AuthLayoutProps) {
   const reduced = useReducedMotion();
 
-  // No `relative` in this className: ScreenTransition is already
-  // `absolute inset-0`, and the later class would win and collapse it to
-  // content height.
+  /*
+    The auth flow does not carry a whole-screen transition — no scale, tilt or
+    fade on this outer frame, the way `ScreenTransition` gives every other
+    screen. Stepping from one auth screen to the next is meant to read as the
+    same set continuing: the photograph, the brand mark and the card frame all
+    hold still, and only what actually changed — the card's own contents —
+    animates. Each field, the back arrow and the card itself still rise in on
+    their own `rise`/`stagger` variants below; it is only this root that lost
+    its animation.
+
+    It still has to be a motion component with an `exit`, though — not for
+    looks, for bookkeeping. `AnimatePresence` in App.tsx keeps an outgoing
+    screen mounted until something inside it reports its exit animation
+    finished, and that report only ever comes from a motion descendant
+    carrying `exit`; a plain div has nothing to report. `exit` below matches
+    `animate` exactly at `duration: 0` — the standard Framer idiom for
+    "present in `AnimatePresence`, nothing to actually animate" — so the
+    outgoing screen is removed the instant the incoming one mounts, rather
+    than lingering underneath it.
+
+    (A same-values check here of counting DOM nodes after each step is not
+    trustworthy evidence either way: this preview pane runs hidden, which
+    starves `requestAnimationFrame` — confirmed separately, zero frames fire
+    in 600ms — so no Framer animation anywhere in the app, including the
+    splash screen's long-working exit, completes while it stays hidden. A
+    live tab does not have that limitation.)
+  */
   return (
-    <ScreenTransition className="isolate overflow-hidden">
+    <motion.div
+      initial={false}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 1 }}
+      transition={{ duration: 0 }}
+      className="absolute inset-0 isolate flex flex-col overflow-hidden">
       {/* The set */}
       <div aria-hidden className="absolute inset-0 -z-20">
         <motion.div
@@ -187,6 +215,6 @@ export default function AuthLayout({
           )}
         </motion.div>
       </div>
-    </ScreenTransition>
+    </motion.div>
   );
 }

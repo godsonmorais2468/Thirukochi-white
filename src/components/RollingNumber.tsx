@@ -1,4 +1,5 @@
 import { motion, useReducedMotion } from "framer-motion";
+import { useIsTouch } from "../hooks/useMediaQuery";
 
 interface RollingNumberProps {
   /** The finished, formatted figure — "₹1,24,379", "8.836 g". */
@@ -8,14 +9,12 @@ interface RollingNumberProps {
   className?: string;
 }
 
-/** Full turns each reel makes before it lands. */
-const SPINS = 2;
 /** Row height, in em, so the drum scales with whatever size it is set at. */
 const ROW = 1.15;
 const DIGITS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
 /**
- * One drum: it spins through two whole cycles, then stops on its digit.
+ * One drum: it spins through `spins` whole cycles, then stops on its digit.
  *
  * The column is built upside down and travels towards `y: 0`, rather than the
  * obvious way round — towards the digit. That way the drum's *resting* row is
@@ -24,9 +23,19 @@ const DIGITS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
  * tab, a device throttling itself — leaves every drum parked on its first row,
  * and the figure reads ₹00,000.00.
  */
-function Reel({ digit, delay }: { digit: number; delay: number }) {
+function Reel({
+  digit,
+  delay,
+  spins,
+  duration,
+}: {
+  digit: number;
+  delay: number;
+  spins: number;
+  duration: number;
+}) {
   const ascending: number[] = [];
-  for (let turn = 0; turn < SPINS; turn += 1) ascending.push(...DIGITS);
+  for (let turn = 0; turn < spins; turn += 1) ascending.push(...DIGITS);
   ascending.push(...DIGITS.slice(0, digit + 1));
   const rows = ascending.reverse();
 
@@ -36,7 +45,7 @@ function Reel({ digit, delay }: { digit: number; delay: number }) {
         className="block"
         initial={{ y: `-${(rows.length - 1) * ROW}em` }}
         animate={{ y: 0 }}
-        transition={{ duration: 1.05, delay, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ duration, delay, ease: [0.16, 1, 0.3, 1] }}
       >
         {rows.map((row, index) => (
           <span
@@ -54,9 +63,9 @@ function Reel({ digit, delay }: { digit: number; delay: number }) {
 
 /**
  * Figures arrive on drums, the way a weighing scale or a ledger counter lands
- * on its reading — each digit spins through two turns and stops, a beat after
- * the one to its left, and a single sweep of light crosses the whole figure as
- * the last drum settles.
+ * on its reading — each digit spins and stops, a beat after the one to its
+ * left, and a single sweep of light crosses the whole figure as the last drum
+ * settles.
  *
  * This replaces a plain count-up. A count-up says nothing about the house; it
  * also had to interpolate a number and re-format it on every frame, so the
@@ -65,11 +74,22 @@ function Reel({ digit, delay }: { digit: number; delay: number }) {
  *
  * Re-key on `value` at the call site — or let it change — and the drums roll
  * again, which is what makes the gold rate re-read when its unit is switched.
+ *
+ * A phone pays for every one of these in full: this component sits on every
+ * money and weight figure in the app, several times a screen, and a `visit`
+ * key bump remounts a whole tab's worth of them on every nav press. A coarse
+ * pointer gets one quick turn instead of two full ones, a shorter stagger, and
+ * no light sweep — still visibly a roll, at roughly half the animated work.
  */
 export default function RollingNumber({ value, delay = 0, className = "" }: RollingNumberProps) {
   const reduced = useReducedMotion();
+  const touch = useIsTouch();
 
   if (reduced) return <span className={className}>{value}</span>;
+
+  const spins = touch ? 1 : 2;
+  const duration = touch ? 0.65 : 1.05;
+  const stagger = touch ? 0.03 : 0.06;
 
   const characters = [...value];
   let digitIndex = -1;
@@ -84,7 +104,13 @@ export default function RollingNumber({ value, delay = 0, className = "" }: Roll
         if (isDigit) digitIndex += 1;
 
         return isDigit ? (
-          <Reel key={index} digit={Number(character)} delay={delay + digitIndex * 0.06} />
+          <Reel
+            key={index}
+            digit={Number(character)}
+            delay={delay + digitIndex * stagger}
+            spins={spins}
+            duration={duration}
+          />
         ) : (
           <span
             key={index}
@@ -97,18 +123,20 @@ export default function RollingNumber({ value, delay = 0, className = "" }: Roll
         );
       })}
 
-      {/* One pass of light, timed to the last drum stopping */}
-      <motion.span
-        aria-hidden
-        className="pointer-events-none absolute inset-y-0 w-1/3"
-        style={{
-          background:
-            "linear-gradient(104deg, rgba(255,255,255,0) 0%, rgba(255,246,219,0.75) 50%, rgba(255,255,255,0) 100%)",
-        }}
-        initial={{ x: "-160%" }}
-        animate={{ x: "460%" }}
-        transition={{ duration: 0.9, delay: delay + 0.9, ease: [0.4, 0, 0.2, 1] }}
-      />
+      {/* One pass of light, timed to the last drum stopping — skipped on touch */}
+      {!touch && (
+        <motion.span
+          aria-hidden
+          className="pointer-events-none absolute inset-y-0 w-1/3"
+          style={{
+            background:
+              "linear-gradient(104deg, rgba(255,255,255,0) 0%, rgba(255,246,219,0.75) 50%, rgba(255,255,255,0) 100%)",
+          }}
+          initial={{ x: "-160%" }}
+          animate={{ x: "460%" }}
+          transition={{ duration: 0.9, delay: delay + 0.9, ease: [0.4, 0, 0.2, 1] }}
+        />
+      )}
     </span>
   );
 }
