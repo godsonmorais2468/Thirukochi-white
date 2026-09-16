@@ -142,7 +142,7 @@ export default function AuthLayout({
               aria-label={backLabel}
               whileHover={reduced ? undefined : { scale: 1.06 }}
               whileTap={reduced ? undefined : { scale: 0.94 }}
-              className="flex h-9 w-9 shrink-0 items-center justify-center self-start rounded-full border border-[rgba(212,175,55,0.45)] bg-[rgba(255,253,248,0.82)] text-wine-700 backdrop-blur-sm"
+              className="flex h-10 w-10 shrink-0 items-center justify-center self-start rounded-full border border-[rgba(212,175,55,0.45)] bg-[rgba(255,253,248,0.82)] text-wine-700 backdrop-blur-sm"
             >
               <ArrowLeft size={15} strokeWidth={1.7} />
             </motion.button>

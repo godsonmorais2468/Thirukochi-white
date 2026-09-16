@@ -1,6 +1,7 @@
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { X } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import type { ReactNode } from "react";
 import { useIsDesktop } from "../hooks/useMediaQuery";
 import { ease, spring } from "../lib/motion";
@@ -23,6 +24,16 @@ interface ModalProps {
 export default function Modal({ open, onClose, title, eyebrow, children, footer }: ModalProps) {
   const reduced = useReducedMotion();
   const isDesktop = useIsDesktop();
+  /*
+    Every dialog is raised out of wherever it was declared and hung on the
+    frame itself, so it always covers the whole screen — header and dock
+    included — whatever the component that opened it happens to sit inside.
+  */
+  const [host, setHost] = useState<HTMLElement | null>(null);
+
+  useEffect(() => {
+    setHost(document.getElementById("app-frame"));
+  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -45,14 +56,16 @@ export default function Modal({ open, onClose, title, eyebrow, children, footer 
         type="button"
         onClick={onClose}
         aria-label="Close"
-        className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-line text-muted transition-colors duration-300 hover:border-[rgba(107,31,38,0.3)] hover:text-wine-700"
+        className="mt-1 flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-full border border-line text-muted transition-colors duration-300 hover:border-[rgba(107,31,38,0.3)] hover:text-wine-700 sm:h-9 sm:w-9"
       >
         <X size={15} strokeWidth={1.6} />
       </button>
     </div>
   );
 
-  return (
+  if (!host) return null;
+
+  return createPortal(
     <AnimatePresence>
       {open && (
         <>
@@ -107,6 +120,7 @@ export default function Modal({ open, onClose, title, eyebrow, children, footer 
           </motion.div>
         </>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    host,
   );
 }

@@ -87,7 +87,7 @@ export default function ProfileTab({ name, phone, onSignOut }: ProfileTabProps) 
   const allItems = profile.sections.flatMap((section) => section.items);
 
   return (
-    <motion.div variants={stagger} initial="initial" animate="animate" className="flex flex-col gap-3 lg:gap-9">
+    <motion.div variants={stagger} initial="initial" animate="animate" className="flex flex-col gap-2.5 lg:gap-9">
       {/*
         The page title is the card below it on a phone — the account holder's
         own name, with their mark over it. Repeating "Your account" above that
@@ -161,7 +161,7 @@ export default function ProfileTab({ name, phone, onSignOut }: ProfileTabProps) 
               variants={rise}
               type="button"
               onClick={() => openItem(item.key, item.label)}
-              className="surface flex min-h-[70px] flex-col items-start justify-between gap-1.5 rounded-[var(--radius-card)] px-3 py-2.5 text-left transition-colors duration-300 active:bg-cream"
+              className="surface flex min-h-[70px] flex-col items-start justify-between gap-1.5 rounded-[var(--radius-card)] px-2.5 py-2.5 text-left transition-colors duration-300 active:bg-cream"
             >
               <span
                 aria-hidden
@@ -170,7 +170,9 @@ export default function ProfileTab({ name, phone, onSignOut }: ProfileTabProps) 
               >
                 <Icon size={14} strokeWidth={1.6} />
               </span>
-              <span className="block text-[12.5px] font-medium leading-tight text-ink">
+              {/* 12px, so "Certificates & invoices" holds one line and every
+                  tile in the grid keeps the same height. */}
+              <span className="block text-[12px] font-medium leading-tight text-ink">
                 {item.label}
               </span>
             </motion.button>

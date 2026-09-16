@@ -75,12 +75,12 @@ export default function HomeScreen({ name, phone, onSignOut }: HomeScreenProps) 
         <div
           ref={scroller}
           /*
-            The dock floats clear of the bottom edge now, so the runway under
-            the content is measured to it: the card is 61px tall, it sits 10px
-            off the edge, and the coin stands 16px proud of its top rule — 87
-            in all, and `pb-24` leaves nine clear of that.
+            The dock floats clear of the bottom edge, so the runway under the
+            content is measured to the top of the coin, not the top of the bar:
+            a 55px card 10px off the edge, with the coin standing 40px proud of
+            its rule. `pb-28` leaves about two dozen pixels clear of that.
           */
-          className="no-scrollbar scroll-smooth-y min-h-0 flex-1 overflow-y-auto px-4 pb-24 pt-1 sm:px-6 sm:pb-32 lg:px-10 lg:pb-14 lg:pt-2 xl:px-14"
+          className="no-scrollbar scroll-smooth-y min-h-0 flex-1 overflow-y-auto px-4 pb-28 pt-1 sm:px-6 sm:pb-32 lg:px-10 lg:pb-14 lg:pt-2 xl:px-14"
         >
           <div className="mx-auto w-full max-w-[1180px] 2xl:max-w-[1320px]">
             <AnimatePresence mode="wait">

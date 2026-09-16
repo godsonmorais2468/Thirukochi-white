@@ -52,7 +52,9 @@ export default function TopBar({
           aria-label="Notifications"
           whileTap={reduced ? undefined : { scale: 0.92 }}
           transition={spring.press}
-          className="relative flex h-8 w-8 items-center justify-center rounded-full text-gold-200 transition-colors duration-300 hover:text-gold-100 sm:h-9 sm:w-9"
+          /* 38px, not 32: a bell is a small glyph but it still has to be a
+             thumb target, and the capsule has the room. */
+          className="relative flex h-[38px] w-[38px] items-center justify-center rounded-full text-gold-200 transition-colors duration-300 hover:text-gold-100 sm:h-9 sm:w-9"
         >
           <Bell size={15} strokeWidth={1.7} />
           {unread && (
@@ -72,7 +74,7 @@ export default function TopBar({
           whileTap={reduced ? undefined : { scale: 0.94 }}
           whileHover={reduced ? undefined : { scale: 1.04 }}
           transition={spring.press}
-          className="gold-fill flex h-8 w-8 items-center justify-center rounded-full font-display text-[13px] text-wine-900 sm:h-9 sm:w-9 sm:text-[14px]"
+          className="gold-fill flex h-[38px] w-[38px] items-center justify-center rounded-full font-display text-[14px] text-wine-900 sm:h-9 sm:w-9"
           style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.55)" }}
         >
           {initial}

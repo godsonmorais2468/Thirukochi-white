@@ -148,7 +148,7 @@ export default function GoldRateCard() {
                   type="button"
                   onClick={() => setSelected(option.id)}
                   aria-pressed={isActive}
-                  className={`relative isolate flex-1 rounded-full px-2 py-1.5 text-[12px] font-medium tracking-luxe-sm uppercase transition-colors duration-400 sm:py-2 sm:text-[12.5px] ${
+                  className={`relative isolate flex-1 rounded-full px-2 py-2.5 text-[12px] font-medium tracking-luxe-sm uppercase transition-colors duration-400 sm:py-2 sm:text-[12.5px] ${
                     isActive ? "text-wine-900" : "text-muted hover:text-wine-700"
                   }`}
                 >

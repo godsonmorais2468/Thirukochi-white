@@ -52,7 +52,17 @@ export default function AppShell({ children, onReset }: AppShellProps) {
 
         <div className="relative h-dvh w-full overflow-hidden bg-ivory shadow-[0_50px_120px_-48px_rgba(68,48,30,0.5),0_0_0_1px_rgba(232,222,208,0.9)] sm:h-[844px] sm:max-h-[94vh] sm:w-[390px] sm:rounded-[46px] lg:h-dvh lg:max-h-none lg:w-full lg:rounded-none lg:shadow-none">
           <PageBackground />
-          <div className="relative z-10 h-full">{children}</div>
+          {/*
+            Named, because dialogs portal themselves in here. Declared beside
+            the control that opens them, they would otherwise land wherever
+            that control happens to live — for one of them, inside the tab
+            scroller, which carries `contain: paint` and so became its
+            containing block: the sheet was sized to the scroll area and
+            painted under the dock, with its footer button unreachable.
+          */}
+          <div id="app-frame" className="relative z-10 h-full">
+            {children}
+          </div>
           <ToastStack toasts={toasts} />
           <ResetDemo onReset={onReset} />
         </div>
