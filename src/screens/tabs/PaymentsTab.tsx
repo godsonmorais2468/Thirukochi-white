@@ -9,7 +9,7 @@ import PremiumCard from "../../components/PremiumCard";
 import SectionHeader from "../../components/SectionHeader";
 import { GoldSpinner } from "../../components/LoadingState";
 import StatusBadge from "../../components/StatusBadge";
-import { useCountUp } from "../../hooks/useCountUp";
+import RollingNumber from "../../components/RollingNumber";
 import { formatGrams, formatRupees } from "../../lib/format";
 import { payments } from "../../data/mock";
 import { rise, stagger, staggerTight } from "../../lib/motion";
@@ -21,7 +21,6 @@ interface PaymentsTabProps {
 }
 
 export default function PaymentsTab({ onNavigate }: PaymentsTabProps) {
-  const paid = useCountUp(payments.paidThisYear, { duration: 1.6, delay: 0.25 });
   const [paying, setPaying] = useState(false);
   const timeout = useRef<number>(0);
   const toast = useToast();
@@ -61,7 +60,7 @@ export default function PaymentsTab({ onNavigate }: PaymentsTabProps) {
           <div>
             <p className="text-[11px] font-medium tracking-luxe uppercase text-gold-700">Paid this year</p>
             <p className="mt-2.5 font-display text-[clamp(28px,8vw,44px)] leading-none text-ink sm:mt-4 sm:text-[clamp(32px,9vw,44px)]">
-              {formatRupees(paid)}
+              <RollingNumber value={formatRupees(payments.paidThisYear)} delay={0.2} />
             </p>
           </div>
 

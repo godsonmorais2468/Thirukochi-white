@@ -11,12 +11,18 @@ interface BottomNavigationProps {
 }
 
 /** The coin, and the bite the bar takes out of itself to seat it. */
-const COIN = 52;
-const NOTCH = 32;
-/** How far the coin's centre sits above the bar's top edge. */
-const RISE = 14;
+const COIN = 44;
+/** Coin radius plus a five-pixel gap ring. */
+const NOTCH = 27;
+/**
+ * How far the coin's centre sits above the bar's top edge. Low enough that the
+ * coin nearly meets the label under it — at 14 the two read as separate pieces
+ * with a band of bar stranded between them — and still high enough that most
+ * of it stands proud of the rule.
+ */
+const RISE = 5;
 /** Lift that carries an icon from its resting row up into the coin. */
-const ICON_LIFT = 34;
+const ICON_LIFT = 25;
 
 /** Three pips near the rim. Without them a disc of gold cannot be seen to turn. */
 const PIPS = [0, 120, 240];

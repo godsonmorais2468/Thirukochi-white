@@ -2,7 +2,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
 import PremiumCard from "./PremiumCard";
 import PremiumButton from "./PremiumButton";
-import { useCountUp } from "../hooks/useCountUp";
+import RollingNumber from "./RollingNumber";
 import { formatGrams, formatRupees } from "../lib/format";
 import { schemeCallout, wallet } from "../data/mock";
 import { ease, layout } from "../lib/motion";
@@ -72,7 +72,6 @@ function ProgressRing({ paid, total }: { paid: number; total: number }) {
  * left; the invitation to start another sits on the right.
  */
 export default function GoldJourney({ onExplore, onPay, className = "" }: GoldJourneyProps) {
-  const grams = useCountUp(wallet.goldGrams, { duration: 1.5, delay: 0.5 });
   const { scheme } = wallet;
   const remaining = scheme.total - scheme.paid;
 
@@ -98,7 +97,7 @@ export default function GoldJourney({ onExplore, onPay, className = "" }: GoldJo
             <dl className="mt-3 flex flex-col gap-1.5 border-t border-line-soft pt-3 text-[12.5px] sm:mt-4 sm:gap-2 sm:pt-3.5 sm:text-[13px]">
               <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-0.5">
                 <dt className="text-muted">Gold held</dt>
-                <dd className="font-display text-[14px] text-ink">{formatGrams(grams)}</dd>
+                <dd className="font-display text-[14px] text-ink"><RollingNumber value={formatGrams(wallet.goldGrams)} delay={0.45} /></dd>
               </div>
               <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-0.5">
                 <dt className="text-muted">Remaining</dt>

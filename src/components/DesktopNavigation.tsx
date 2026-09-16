@@ -88,7 +88,12 @@ export default function DesktopNavigation({
 
         <LeafMotif />
 
-        <div className="relative z-10 px-1">
+        {/*
+          Centred. The lockup is a fixed 152px inside a rail about 220px wide,
+          so left-aligned it sat well off the rail's axis while everything
+          under it — the plates, the house line — reads from the middle.
+        */}
+        <div className="relative z-10 flex justify-center px-1">
           {showLogo && <BrandLogo variant="lockup" tone="light" width={152} shared />}
         </div>
 

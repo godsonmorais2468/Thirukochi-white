@@ -18,7 +18,7 @@ import PremiumCard from "../../components/PremiumCard";
 import PromotionCard from "../../components/PromotionCard";
 import QuickAction from "../../components/QuickAction";
 import ReferralCard from "../../components/ReferralCard";
-import { useCountUp } from "../../hooks/useCountUp";
+import RollingNumber from "../../components/RollingNumber";
 import { formatGrams, formatRupees } from "../../lib/format";
 import { payments, wallet } from "../../data/mock";
 import { bentoStagger, dealIn, staggerTight } from "../../lib/motion";
@@ -75,8 +75,6 @@ function Line({
 
 export default function HomeTab({ name, onOpenSchemes, onNavigate }: HomeTabProps) {
   const firstName = name.trim().split(" ")[0] || "there";
-  const grams = useCountUp(wallet.goldGrams, { duration: 1.5, delay: 0.4 });
-  const value = useCountUp(wallet.goldValue, { duration: 1.6, delay: 0.45 });
 
   return (
     <motion.div variants={bentoStagger} initial="initial" animate="animate" className="flex flex-col gap-3 sm:gap-4 lg:gap-5">
@@ -111,10 +109,10 @@ export default function HomeTab({ name, onOpenSchemes, onNavigate }: HomeTabProp
             <p className="text-[11px] font-medium tracking-luxe uppercase text-gold-700">Your holdings</p>
 
             <p className="mt-2.5 font-display text-[clamp(26px,7vw,38px)] leading-none text-ink sm:mt-4 sm:text-[clamp(30px,8vw,38px)]">
-              {formatGrams(grams)}
+              <RollingNumber value={formatGrams(wallet.goldGrams)} delay={0.35} />
             </p>
             <p className="mt-1.5 text-[13px] text-muted sm:mt-2">
-              Worth <span className="font-display text-[14px] text-ink">{formatRupees(value)}</span>{" "}
+              Worth <RollingNumber className="font-display text-[14px] text-ink" value={formatRupees(wallet.goldValue)} delay={0.4} />{" "}
               today
             </p>
 

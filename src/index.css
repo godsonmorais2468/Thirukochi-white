@@ -370,6 +370,163 @@
   }
 }
 
+/* ------------------------------------------------------------- the opening */
+
+/*
+  The splash runs on CSS keyframes rather than on the motion library, and it is
+  the one screen in the app that does.
+
+  The app is wrapped in `MotionConfig reducedMotion="user"`, which is right for
+  the interface — but it means that on a machine with system animations turned
+  off, every library animation jumps straight to its end value. The opening
+  would then be a still photograph on that machine and nowhere else, which is
+  exactly the kind of fault that is impossible to see from the inside.
+  Keyframes below are driven by the compositor, so the opening plays for
+  everyone, and slows to a dignified minimum for anyone who has asked for less.
+*/
+
+@keyframes splash-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes splash-spin-back {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+/* Warm light swelling behind the mark. */
+@keyframes splash-halo {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(0.92);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.08);
+  }
+}
+
+/* A band of light crossing the lockup. */
+@keyframes splash-shine {
+  0% {
+    transform: translateX(-170%) skewX(-12deg);
+  }
+  55%,
+  100% {
+    transform: translateX(300%) skewX(-12deg);
+  }
+}
+
+/* Dust leaving the floor of the frame. */
+@keyframes splash-rise {
+  0% {
+    opacity: 0;
+    transform: translateY(0) scale(0.7);
+  }
+  18% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-210px) scale(1);
+  }
+}
+
+@keyframes splash-fill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* Arrival: everything in the centre lands once, then the loops take over. */
+@keyframes splash-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes splash-lift {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes splash-glint {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* The mark is uncovered by a wipe travelling across it. */
+@keyframes splash-strike {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes splash-edge {
+  0% {
+    left: 0%;
+    opacity: 0;
+  }
+  12%,
+  88% {
+    opacity: 1;
+  }
+  100% {
+    left: 100%;
+    opacity: 0;
+  }
+}
+
+@utility splash-anim {
+  animation-duration: var(--splash-duration, 1s);
+  animation-delay: var(--splash-delay, 0s);
+  animation-timing-function: var(--splash-ease, cubic-bezier(0.22, 1, 0.36, 1));
+  animation-iteration-count: var(--splash-repeat, 1);
+  animation-fill-mode: both;
+  animation-name: var(--splash-name);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .splash-anim {
+    /* Held, not stopped: the arrival still plays, the loops do not. */
+    animation-iteration-count: 1;
+    animation-duration: 0.4s;
+    animation-delay: 0s;
+  }
+}
+
 /*
   PHONES — the decoration budget.
 

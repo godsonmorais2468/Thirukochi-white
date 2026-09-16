@@ -9,7 +9,7 @@ import ReferralCard from "../../components/ReferralCard";
 import SectionHeader from "../../components/SectionHeader";
 import StatCard from "../../components/StatCard";
 import StatusBadge from "../../components/StatusBadge";
-import { useCountUp } from "../../hooks/useCountUp";
+import RollingNumber from "../../components/RollingNumber";
 import { formatGrams, formatRupees } from "../../lib/format";
 import { referral, wallet } from "../../data/mock";
 import { rise, stagger, staggerTight } from "../../lib/motion";
@@ -21,9 +21,6 @@ interface WalletTabProps {
 
 /** Holdings first, then the referral ledger that feeds them. */
 export default function WalletTab({ onNavigate }: WalletTabProps) {
-  const grams = useCountUp(wallet.goldGrams, { duration: 1.5, delay: 0.3 });
-  const value = useCountUp(wallet.goldValue, { duration: 1.6, delay: 0.35 });
-  const earned = useCountUp(referral.bonusEarned, { duration: 1.6, delay: 0.45 });
   const schemeProgress = (wallet.scheme.paid / wallet.scheme.total) * 100;
 
   return (
@@ -45,10 +42,10 @@ export default function WalletTab({ onNavigate }: WalletTabProps) {
           <div className="min-w-0">
             <p className="text-[11px] font-medium tracking-luxe uppercase text-gold-700">Total holding</p>
             <p className="mt-2.5 font-display text-[clamp(30px,9vw,50px)] leading-none text-ink sm:mt-4 sm:text-[clamp(36px,10vw,50px)]">
-              {formatGrams(grams)}
+              <RollingNumber value={formatGrams(wallet.goldGrams)} delay={0.25} />
             </p>
             <p className="mt-2 flex flex-wrap items-center gap-2 text-[13px] text-muted sm:mt-3 sm:text-[13.5px]">
-              <span className="font-display text-[17px] text-ink">{formatRupees(value)}</span>
+              <RollingNumber className="font-display text-[17px] text-ink" value={formatRupees(wallet.goldValue)} delay={0.3} />
               at today&apos;s rate
               <span className="inline-flex items-center gap-1 rounded-full bg-[rgba(44,122,86,0.08)] px-2.5 py-1 text-[12.5px] font-medium text-positive">
                 <TrendingUp size={12} strokeWidth={1.9} />
@@ -93,7 +90,7 @@ export default function WalletTab({ onNavigate }: WalletTabProps) {
           <StatCard
             accent
             label="Bonus earned"
-            value={formatRupees(earned)}
+            value={formatRupees(referral.bonusEarned)}
             detail="Credited to your account"
             icon={<Gift size={14} strokeWidth={1.7} />}
           />

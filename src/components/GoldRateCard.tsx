@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import GoldBadge from "./GoldBadge";
 import GoldRateChart from "./GoldRateChart";
 import PremiumCard from "./PremiumCard";
-import { useCountUp } from "../hooks/useCountUp";
+import RollingNumber from "./RollingNumber";
 import { formatRupeesExact } from "../lib/format";
 import { goldRate } from "../data/mock";
 import { spring } from "../lib/motion";
@@ -64,7 +64,6 @@ const CYCLE_MS = 4200;
 export default function GoldRateCard() {
   const [selected, setSelected] = useState(goldRate.options[0].id);
   const active = goldRate.options.find((option) => option.id === selected) ?? goldRate.options[0];
-  const price = useCountUp(active.price, { duration: 1.3, delay: 0.3 });
   const falling = active.change < 0;
   const reduced = useReducedMotion();
 
@@ -91,7 +90,7 @@ export default function GoldRateCard() {
           </div>
 
           <p className="mt-2 font-display text-[clamp(30px,9vw,52px)] leading-[0.95] text-ink sm:mt-5 sm:text-[clamp(34px,10vw,52px)]">
-            {formatRupeesExact(price)}
+            <RollingNumber key={active.id} value={formatRupeesExact(active.price)} delay={0.25} />
           </p>
 
           <div className="mt-2 flex flex-wrap items-center gap-2 sm:mt-4">

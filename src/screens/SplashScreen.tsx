@@ -1,69 +1,95 @@
-import { motion, useReducedMotion } from "framer-motion";
 import { useEffect, useRef } from "react";
+import type { CSSProperties } from "react";
 import BrandLogo from "../components/BrandLogo";
 import ScreenTransition from "../components/ScreenTransition";
-import { ease, spring } from "../lib/motion";
 
 interface SplashScreenProps {
   onDone: () => void;
 }
 
+/** How long the opening runs before the app takes over. */
+const HOLD_MS = 2800;
+
 /**
- * How long the opening runs before the app takes over. Short enough that a
- * returning customer never waits on it — every beat below is timed to land
- * inside it, so the screen is never caught mid-thought when it leaves.
+ * Shorthand for the keyframe utility: name, how long, when, easing, how often.
+ * Everything on this screen is driven this way.
  */
-const HOLD_MS = 1900;
+const anim = (
+  name: string,
+  duration: number,
+  delay = 0,
+  repeat: number | "infinite" = 1,
+  easing = "cubic-bezier(0.22, 1, 0.36, 1)",
+): CSSProperties =>
+  ({
+    "--splash-name": name,
+    "--splash-duration": `${duration}s`,
+    "--splash-delay": `${delay}s`,
+    "--splash-repeat": repeat,
+    "--splash-ease": easing,
+  }) as CSSProperties;
 
-/** Where the white ground hands over to the burgundy one. */
-const SEAM = "46%";
-
-const MOTES = [
-  { x: 10, y: 82, delay: 0, size: 3 },
-  { x: 24, y: 94, delay: 0.6, size: 2 },
-  { x: 40, y: 88, delay: 1.2, size: 2.5 },
-  { x: 62, y: 96, delay: 0.35, size: 2 },
-  { x: 78, y: 84, delay: 1, size: 3 },
-  { x: 90, y: 92, delay: 1.6, size: 2 },
+/** Dust leaving the floor. Left offset, size, when it starts, how long it lives. */
+const DUST = [
+  { x: 6, size: 3, delay: 0.2, duration: 2.6 },
+  { x: 17, size: 2, delay: 1.1, duration: 3 },
+  { x: 28, size: 2.5, delay: 0.55, duration: 2.3 },
+  { x: 39, size: 2, delay: 1.5, duration: 2.8 },
+  { x: 50, size: 3, delay: 0.85, duration: 2.5 },
+  { x: 61, size: 2, delay: 1.8, duration: 3.1 },
+  { x: 72, size: 2.5, delay: 0.35, duration: 2.7 },
+  { x: 83, size: 2, delay: 1.3, duration: 2.4 },
+  { x: 93, size: 3, delay: 0.7, duration: 2.9 },
 ];
 
-/** A sprig of gold leaf, the same one the printed furniture uses. */
-function LeafSprig({ className = "" }: { className?: string }) {
+/** Corner filigree, in the house's printed style. */
+function Filigree({ className = "" }: { className?: string }) {
   return (
-    <svg aria-hidden viewBox="0 0 120 150" fill="none" className={className}>
+    <svg aria-hidden viewBox="0 0 150 150" fill="none" className={className}>
       <path
-        d="M60 146 C 60 104, 52 66, 30 34"
-        stroke="rgba(176,141,40,0.55)"
-        strokeWidth="1.1"
+        d="M2 2 C 54 2, 92 18, 118 48 C 132 64, 140 88, 142 116"
+        stroke="rgba(229,199,107,0.42)"
+        strokeWidth="1"
+        strokeLinecap="round"
+      />
+      <path
+        d="M2 22 C 44 24, 76 38, 98 64 C 110 78, 116 96, 119 116"
+        stroke="rgba(229,199,107,0.22)"
+        strokeWidth="1"
         strokeLinecap="round"
       />
       {[
-        [58, 118, 22, 12],
-        [54, 98, -24, -10],
-        [49, 80, 20, 10],
-        [43, 62, -20, -9],
-        [37, 47, 16, 8],
-      ].map(([x, y, dx, dy], i) => (
-        <path
-          key={i}
-          d={`M${x} ${y} C ${x + dx * 0.5} ${y + dy - 10}, ${x + dx} ${y + dy - 4}, ${x + dx} ${y + dy + 4} C ${x + dx * 0.6} ${y + dy + 8}, ${x + dx * 0.2} ${y + 4}, ${x} ${y} Z`}
-          fill="rgba(212,175,55,0.22)"
-          stroke="rgba(176,141,40,0.45)"
-          strokeWidth="0.8"
-        />
+        [30, 10],
+        [66, 26],
+        [96, 54],
+        [114, 88],
+      ].map(([x, y], index) => (
+        <circle key={index} cx={x} cy={y} r="1.8" fill="rgba(229,199,107,0.55)" />
       ))}
     </svg>
   );
 }
 
 /**
- * The opening. The frame is split: pearl above, house burgundy below, with a
- * gold seam ruled between them and a white medallion sitting astride it so the
- * mark reads on pearl while the plate stands on burgundy. Everything is
- * transform and opacity, so it stays on the compositor. Tap to skip.
+ * THE OPENING — "the assay ring".
+ *
+ * A burgundy field, the way a piece is presented in its box, with one gold ring
+ * at the centre of it. A bright arc runs that ring without stopping, a finer
+ * ring of dashes turns against it, the mark is struck into the middle by a
+ * travelling edge of light, and gold dust lifts off the floor of the frame the
+ * whole time.
+ *
+ * Every one of those is a CSS keyframe rather than a library animation — see
+ * the note over the keyframes in `index.css`. The app sets the motion library
+ * to honour the system's "reduce motion" flag, which is correct for the
+ * interface but would leave this screen a still photograph on any machine with
+ * animations switched off. Keyframes run regardless, and the media query at
+ * the foot of that block gives anyone who has asked for less a short, quiet
+ * version instead of a dead one.
+ *
+ * Tap anywhere to skip.
  */
 export default function SplashScreen({ onDone }: SplashScreenProps) {
-  const reduced = useReducedMotion();
   const fired = useRef(false);
   const done = useRef(onDone);
 
@@ -82,357 +108,245 @@ export default function SplashScreen({ onDone }: SplashScreenProps) {
       if (fired.current) return;
       fired.current = true;
       done.current();
-    }, reduced ? 800 : HOLD_MS);
+    }, HOLD_MS);
     return () => window.clearTimeout(timer);
-  }, [reduced]);
+  }, []);
 
   return (
-    <ScreenTransition className="isolate overflow-hidden bg-pearl">
+    <ScreenTransition className="isolate overflow-hidden">
+      {/* The field */}
+      <div
+        aria-hidden
+        className="absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(120% 90% at 50% 34%, #7A2530 0%, #5A171F 42%, #3E0E15 74%, #2C070C 100%)",
+        }}
+      />
+      <span aria-hidden className="grain absolute inset-0 opacity-[0.09]" />
+
       <button
         type="button"
         onClick={finish}
         aria-label="Skip intro"
-        className="absolute inset-0 z-40 h-full w-full cursor-default"
+        className="absolute inset-0 z-50 h-full w-full cursor-default"
       />
 
-      {/* Warm bloom on the pearl half */}
-      <span
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 -z-10"
-        style={{
-          height: SEAM,
-          background:
-            "radial-gradient(120% 90% at 50% 20%, rgba(253,249,239,1) 0%, rgba(248,244,234,1) 60%, rgba(244,238,224,1) 100%)",
-        }}
-      />
-
-      {/* The burgundy ground, rising into place */}
-      <motion.div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 overflow-hidden"
-        style={{
-          height: `calc(100% - ${SEAM})`,
-          background: "linear-gradient(168deg, #6B1F26 0%, #4A1117 52%, #370B11 100%)",
-        }}
-        initial={reduced ? false : { y: "100%" }}
-        animate={{ y: 0 }}
-        transition={{ duration: 0.86, ease: [0.22, 1, 0.36, 1] }}
-      >
-        <span aria-hidden className="grain absolute inset-0 opacity-[0.07]" />
-
-        {/* Gold bloom low in the burgundy */}
-        <motion.span
-          aria-hidden
-          className="absolute -bottom-24 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full"
-          style={{
-            background:
-              "radial-gradient(circle, rgba(229,199,107,0.22) 0%, rgba(229,199,107,0) 70%)",
-          }}
-          animate={reduced ? undefined : { opacity: [0.5, 1, 0.5], scale: [0.95, 1.08, 0.95] }}
-          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-        />
-
-        {!reduced &&
-          MOTES.map((mote, index) => (
-            <motion.span
-              key={index}
-              aria-hidden
-              className="absolute rounded-full"
-              style={{
-                left: `${mote.x}%`,
-                top: `${mote.y}%`,
-                width: mote.size,
-                height: mote.size,
-                background: "rgba(229,199,107,0.95)",
-                boxShadow: "0 0 8px rgba(229,199,107,0.9)",
-              }}
-              initial={{ opacity: 0, y: 0 }}
-              animate={{ opacity: [0, 1, 0], y: -120 }}
-              transition={{ duration: 4.6, delay: 0.8 + mote.delay, repeat: Infinity, ease: "easeOut" }}
-            />
-          ))}
-      </motion.div>
-
-      {/* The seam, ruled out from the centre, with a diamond set on it */}
-      <div aria-hidden className="pointer-events-none absolute inset-x-0 -z-10" style={{ top: SEAM }}>
-        <motion.span
-          className="block h-px w-full origin-center"
-          style={{
-            background:
-              "linear-gradient(90deg, rgba(212,175,55,0) 0%, rgba(229,199,107,0.85) 50%, rgba(212,175,55,0) 100%)",
-          }}
-          initial={reduced ? false : { scaleX: 0 }}
-          animate={{ scaleX: 1 }}
-          transition={{ duration: 0.8, delay: 0.26, ease: ease.silk }}
-        />
-      </div>
-
-      {/* Faint rings rippling out from the plate, so the pearl half is not bare */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute left-1/2 -z-10"
-        style={{ top: SEAM, transform: "translate(-50%, -50%)" }}
-      >
-        {[1.35, 1.78, 2.24].map((scale, index) => (
-          <motion.span
-            className="absolute left-1/2 top-1/2 rounded-full"
-            key={scale}
+      {/* Dust off the floor */}
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 overflow-hidden">
+        {DUST.map((speck, index) => (
+          <span
+            key={index}
+            className="splash-anim absolute bottom-0 rounded-full"
             style={{
-              width: "clamp(228px,66vw,292px)",
-              height: "clamp(228px,66vw,292px)",
-              marginLeft: "calc(clamp(228px,66vw,292px) / -2)",
-              marginTop: "calc(clamp(228px,66vw,292px) / -2)",
-              border: `1px solid rgba(176,141,40,${0.2 - index * 0.05})`,
+              ...anim("splash-rise", speck.duration, speck.delay, "infinite", "cubic-bezier(0.4, 0, 0.5, 1)"),
+              left: `${speck.x}%`,
+              width: speck.size,
+              height: speck.size,
+              background: "rgba(248,232,178,0.95)",
+              boxShadow: "0 0 10px rgba(229,199,107,0.9)",
             }}
-            initial={reduced ? false : { opacity: 0, scale: scale * 0.9 }}
-            animate={{ opacity: 1, scale }}
-            transition={{ duration: 1.1, delay: 0.4 + index * 0.11, ease: ease.silk }}
           />
         ))}
       </div>
 
-      {/* A struck diamond over a pair of rules, high on the pearl */}
-      <motion.div
+      {/* Filigree in the upper corners */}
+      <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-[clamp(58px,11vh,104px)] -z-10 flex items-center justify-center gap-3"
-        initial={{ opacity: 0, y: -8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.46, ease: ease.silk }}
+        className="splash-anim pointer-events-none absolute left-0 top-0 h-[128px] w-[128px] sm:h-[168px] sm:w-[168px]"
+        style={anim("splash-lift", 0.9, 0.15)}
       >
-        <motion.span
-          className="h-px origin-right bg-[rgba(176,141,40,0.45)]"
-          style={{ width: "clamp(44px,14vw,72px)" }}
-          initial={reduced ? false : { scaleX: 0 }}
-          animate={{ scaleX: 1 }}
-          transition={{ duration: 0.62, delay: 0.54, ease: ease.silk }}
-        />
-        {/* No `rotate-45` class here: Tailwind writes the `rotate` property,
-            which stacks with the rotation Framer animates and squares it off. */}
-        <motion.span
-          style={{
-            width: 7,
-            height: 7,
-            background: "linear-gradient(135deg,#e5c76b,#b08d28)",
-          }}
-          initial={reduced ? false : { scale: 0, rotate: 0 }}
-          animate={{ scale: 1, rotate: 45 }}
-          transition={{ ...spring.press, delay: 0.6 }}
-        />
-        <motion.span
-          className="h-px origin-left bg-[rgba(176,141,40,0.45)]"
-          style={{ width: "clamp(44px,14vw,72px)" }}
-          initial={reduced ? false : { scaleX: 0 }}
-          animate={{ scaleX: 1 }}
-          transition={{ duration: 0.62, delay: 0.54, ease: ease.silk }}
-        />
-      </motion.div>
-
-      {/* Leaf sprigs filling the pearl corners */}
-      <motion.div
+        <Filigree className="h-full w-full" />
+      </div>
+      <div
         aria-hidden
-        className="pointer-events-none absolute -left-6 top-6 -z-10 h-[150px] w-[120px] sm:h-[190px] sm:w-[150px]"
-        initial={{ opacity: 0, rotate: -10, y: -8 }}
-        animate={{ opacity: 1, rotate: 0, y: 0 }}
-        transition={{ duration: 0.85, delay: 0.16, ease: ease.silk }}
+        className="splash-anim pointer-events-none absolute right-0 top-0 h-[128px] w-[128px] -scale-x-100 sm:h-[168px] sm:w-[168px]"
+        style={anim("splash-lift", 0.9, 0.25)}
       >
-        <LeafSprig className="h-full w-full" />
-      </motion.div>
-      <motion.div
-        aria-hidden
-        className="pointer-events-none absolute -right-6 top-6 -z-10 h-[150px] w-[120px] -scale-x-100 sm:h-[190px] sm:w-[150px]"
-        initial={{ opacity: 0, rotate: 10, y: -8 }}
-        animate={{ opacity: 1, rotate: 0, y: 0 }}
-        transition={{ duration: 0.85, delay: 0.22, ease: ease.silk }}
-      >
-        <LeafSprig className="h-full w-full" />
-      </motion.div>
+        <Filigree className="h-full w-full" />
+      </div>
 
-      <div className="relative z-10 flex h-full w-full flex-col items-center px-6">
-        {/* The medallion, standing astride the seam */}
-        <div className="absolute left-1/2" style={{ top: SEAM, transform: "translate(-50%, -50%)" }}>
-          <div className="relative flex items-center justify-center">
-            {/* Ring drawn around the plate */}
-            <motion.svg
-              aria-hidden
-              viewBox="0 0 240 240"
-              fill="none"
-              className="absolute h-[clamp(228px,66vw,292px)] w-[clamp(228px,66vw,292px)] -rotate-90"
-            >
-              <defs>
-                <linearGradient id="splash-ring" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stopColor="#e5c76b" />
-                  <stop offset="50%" stopColor="#c29a2c" />
-                  <stop offset="100%" stopColor="#8a6a1f" />
-                </linearGradient>
-              </defs>
-              <motion.circle
-                cx="120"
-                cy="120"
-                r="112"
-                stroke="url(#splash-ring)"
-                strokeWidth="1.3"
-                strokeLinecap="round"
-                initial={reduced ? false : { pathLength: 0, opacity: 0 }}
-                animate={{ pathLength: 1, opacity: 1 }}
-                transition={{ duration: 1, delay: 0.3, ease: ease.silk }}
-              />
-              {[0, 90, 180, 270].map((angle, index) => (
-                <motion.line
-                  key={angle}
-                  x1="120"
-                  y1="2"
-                  x2="120"
-                  y2="14"
-                  stroke="rgba(212,175,55,0.9)"
-                  strokeWidth="1.4"
-                  strokeLinecap="round"
-                  transform={`rotate(${angle} 120 120)`}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.3, delay: 0.56 + index * 0.09, ease: ease.silk }}
-                />
-              ))}
-            </motion.svg>
+      {/* ---------------------------------------------------------- the ring */}
 
-            {/*
-              The loader. A short gold arc runs the ring while the app comes
-              up — one element, one compositor-only rotation, and the only
-              thing on the screen that repeats. No Tailwind `rotate` class on
-              it: that property would stack with the one Framer animates.
-            */}
-            {!reduced && (
-              <motion.svg
-                aria-hidden
-                viewBox="0 0 240 240"
-                fill="none"
-                className="absolute h-[clamp(228px,66vw,292px)] w-[clamp(228px,66vw,292px)]"
-                initial={{ opacity: 0, rotate: 0 }}
-                animate={{ opacity: 1, rotate: 360 }}
-                transition={{
-                  opacity: { duration: 0.5, delay: 0.85, ease: ease.silk },
-                  rotate: { duration: 1.6, repeat: Infinity, ease: "linear" },
-                }}
-              >
-                <circle
-                  cx="120"
-                  cy="120"
-                  r="112"
-                  stroke="url(#splash-ring)"
-                  strokeWidth="2.6"
-                  strokeLinecap="round"
-                  /* A 62px stroke on a ~704px circumference: a ninth of the ring. */
-                  strokeDasharray="62 642"
-                />
-              </motion.svg>
-            )}
-
-            {/* The pearl plate */}
-            <motion.div
-              className="relative flex items-center justify-center overflow-hidden rounded-full"
-              style={{
-                width: "clamp(196px,58vw,252px)",
-                height: "clamp(196px,58vw,252px)",
-                background:
-                  "radial-gradient(120% 120% at 50% 22%, #ffffff 0%, #fdfaf3 55%, #f7f0e0 100%)",
-                border: "1px solid rgba(212,175,55,0.5)",
-                boxShadow:
-                  "0 30px 70px -30px rgba(58,13,19,0.55), inset 0 2px 0 rgba(255,255,255,0.9)",
-              }}
-              initial={reduced ? false : { scale: 0.82, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ ...spring.soft, delay: 0.1 }}
-            >
-              <motion.div
-                className="relative"
-                initial={reduced ? false : { opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.3, ease: ease.silk }}
-              >
-                <BrandLogo variant="lockup" sizeClass="w-[clamp(138px,40vw,180px)]" width={180} shared />
-              </motion.div>
-
-              {/* Light crossing the plate, once */}
-              {!reduced && (
-                <motion.span
-                  aria-hidden
-                  className="pointer-events-none absolute inset-y-0 w-1/3 rounded-full"
-                  style={{
-                    background:
-                      "linear-gradient(105deg, rgba(255,255,255,0) 0%, rgba(255,250,232,0.9) 50%, rgba(255,255,255,0) 100%)",
-                  }}
-                  initial={{ x: "-180%" }}
-                  animate={{ x: "420%" }}
-                  transition={{ duration: 0.95, delay: 0.66, ease: [0.4, 0, 0.2, 1] }}
-                />
-              )}
-            </motion.div>
-          </div>
-        </div>
-
-        {/* House line and thread, sitting on the burgundy */}
+      <div className="relative z-10 flex h-full w-full flex-col items-center justify-center px-6">
         <div
-          className="absolute inset-x-0 flex flex-col items-center px-8"
-          style={{ top: `calc(${SEAM} + clamp(150px,31vw,182px))` }}
+          className="splash-anim relative flex items-center justify-center"
+          style={{
+            ...anim("splash-enter", 0.85, 0.05),
+            width: "clamp(232px,66vw,290px)",
+            height: "clamp(232px,66vw,290px)",
+          }}
         >
-          <motion.div
-            className="flex items-center gap-3"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.72, ease: ease.silk }}
-          >
-            <motion.span
-              aria-hidden
-              className="h-px bg-[rgba(229,199,107,0.7)]"
-              initial={{ width: 0 }}
-              animate={{ width: 30 }}
-              transition={{ duration: 0.5, delay: 0.8, ease: ease.silk }}
-            />
-            <motion.span
-              className="text-[11px] font-medium uppercase text-gold-300"
-              initial={{ letterSpacing: "0.04em", opacity: 0 }}
-              animate={{ letterSpacing: "0.34em", opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.78, ease: ease.silk }}
-            >
-              Est. Kochi
-            </motion.span>
-            <motion.span
-              aria-hidden
-              className="h-px bg-[rgba(229,199,107,0.7)]"
-              initial={{ width: 0 }}
-              animate={{ width: 30 }}
-              transition={{ duration: 0.5, delay: 0.8, ease: ease.silk }}
-            />
-          </motion.div>
+          {/* Halo behind everything */}
+          <span
+            aria-hidden
+            className="splash-anim absolute inset-[-18%] rounded-full"
+            style={{
+              ...anim("splash-halo", 2.4, 0.3, "infinite", "ease-in-out"),
+              background:
+                "radial-gradient(circle, rgba(229,199,107,0.28) 0%, rgba(229,199,107,0.06) 46%, rgba(229,199,107,0) 72%)",
+            }}
+          />
 
-          <motion.p
-            className="mt-4 text-center text-[12.5px] leading-snug text-gold-200/80"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.9, ease: ease.silk }}
+          {/* Fine dashes, turning slowly against the arc */}
+          <svg
+            aria-hidden
+            viewBox="0 0 240 240"
+            fill="none"
+            className="splash-anim absolute inset-0 h-full w-full"
+            style={anim("splash-spin-back", 9, 0, "infinite", "linear")}
           >
-            Gold held with trust, since the first instalment.
-          </motion.p>
-        </div>
+            <circle
+              cx="120"
+              cy="120"
+              r="112"
+              stroke="rgba(229,199,107,0.42)"
+              strokeWidth="1"
+              strokeDasharray="2 10"
+            />
+          </svg>
 
-        {/* The thread filling as the opening runs out */}
-        <div className="absolute bottom-[clamp(46px,10vh,84px)] flex flex-col items-center gap-3">
-          <div className="relative h-[2px] w-[clamp(120px,36vw,160px)] overflow-hidden rounded-full bg-[rgba(229,199,107,0.22)]">
-            <motion.span
-              className="gold-fill absolute inset-y-0 left-0 w-full origin-left"
-              initial={{ scaleX: 0 }}
-              animate={{ scaleX: 1 }}
-              transition={{ duration: reduced ? 0.4 : 1.75, ease: [0.3, 0, 0.2, 1] }}
+          {/* The ring itself, and the arc running it */}
+          <svg aria-hidden viewBox="0 0 240 240" fill="none" className="absolute inset-0 h-full w-full">
+            <defs>
+              <linearGradient id="assay-arc" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stopColor="#fff6db" />
+                <stop offset="45%" stopColor="#e5c76b" />
+                <stop offset="100%" stopColor="rgba(212,175,55,0)" />
+              </linearGradient>
+            </defs>
+            <circle cx="120" cy="120" r="98" stroke="rgba(229,199,107,0.3)" strokeWidth="1.2" />
+          </svg>
+
+          <svg
+            aria-hidden
+            viewBox="0 0 240 240"
+            fill="none"
+            className="splash-anim absolute inset-0 h-full w-full"
+            style={anim("splash-spin", 1.9, 0, "infinite", "linear")}
+          >
+            {/* A 150px stroke on a ~616px circumference: a quarter of the ring */}
+            <circle
+              cx="120"
+              cy="120"
+              r="98"
+              stroke="url(#assay-arc)"
+              strokeWidth="2.6"
+              strokeLinecap="round"
+              strokeDasharray="150 466"
+            />
+          </svg>
+
+          {/* The head of the arc, a bright bead on the ring */}
+          <div
+            aria-hidden
+            className="splash-anim absolute inset-0"
+            style={anim("splash-spin", 1.9, 0, "infinite", "linear")}
+          >
+            <span
+              className="absolute left-1/2 rounded-full"
+              /* The ring is r=98 in a 240 viewBox: 40.83% of the box from the
+                 centre, so the bead rides it at 9.17% from the top. */
+              style={{
+                top: "9.17%",
+                width: 7,
+                height: 7,
+                marginLeft: -3.5,
+                marginTop: -3.5,
+                background: "#fff8e6",
+                boxShadow: "0 0 16px rgba(255,246,219,1), 0 0 30px rgba(229,199,107,0.8)",
+              }}
             />
           </div>
 
-          <motion.span
-            className="text-[9.5px] font-medium uppercase tracking-[0.34em] text-gold-200/60"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.4, delay: 0.95, ease: ease.silk }}
+          {/* ------------------------------------------------------- the mark */}
+
+          <div className="relative flex flex-col items-center">
+            <div className="relative inline-block">
+              <div
+                className="splash-anim overflow-hidden"
+                style={anim("splash-strike", 0.9, 0.5)}
+              >
+                <BrandLogo
+                  variant="lockup"
+                  tone="light"
+                  sizeClass="w-[clamp(142px,40vw,178px)]"
+                  width={178}
+                  shared
+                />
+
+                {/*
+                  The repeating band of light lives inside the wipe's box,
+                  which is the only element here that clips — outside it the
+                  band would run on past the lockup across bare burgundy.
+                */}
+                <span
+                  aria-hidden
+                  className="splash-anim pointer-events-none absolute inset-y-0 w-1/4"
+                  style={{
+                    ...anim("splash-shine", 2.2, 1.5, "infinite", "cubic-bezier(0.4, 0, 0.2, 1)"),
+                    background:
+                      "linear-gradient(100deg, rgba(255,255,255,0) 0%, rgba(255,250,232,0.38) 50%, rgba(255,255,255,0) 100%)",
+                  }}
+                />
+              </div>
+
+              {/* The edge doing the striking */}
+              <span
+                aria-hidden
+                className="splash-anim pointer-events-none absolute -inset-y-3 w-[2px] rounded-full"
+                style={{
+                  ...anim("splash-edge", 0.9, 0.5),
+                  background:
+                    "linear-gradient(180deg, rgba(229,199,107,0) 0%, rgba(255,250,235,1) 50%, rgba(229,199,107,0) 100%)",
+                  boxShadow: "0 0 18px rgba(255,246,219,0.95)",
+                }}
+              />
+
+            </div>
+
+            <span
+              aria-hidden
+              className="splash-anim gold-fill mt-4 block h-px w-[86px] origin-center rounded-full"
+              style={anim("splash-fill", 0.7, 1.15)}
+            />
+          </div>
+        </div>
+
+        {/* --------------------------------------------------------- the foot */}
+
+        <div
+          className="splash-anim mt-8 flex items-center gap-3"
+          style={anim("splash-lift", 0.6, 1.25)}
+        >
+          <span aria-hidden className="h-px w-7 bg-[rgba(229,199,107,0.7)]" />
+          <span className="text-[11px] font-medium uppercase tracking-[0.34em] text-gold-300">
+            Est. Kochi
+          </span>
+          <span aria-hidden className="h-px w-7 bg-[rgba(229,199,107,0.7)]" />
+        </div>
+
+        <p
+          className="splash-anim mt-4 max-w-[34ch] text-center text-[12.5px] leading-snug text-gold-200/85"
+          style={anim("splash-lift", 0.6, 1.45)}
+        >
+          Gold held with trust, since the first instalment.
+        </p>
+
+        <div className="absolute bottom-[clamp(44px,9vh,80px)] flex flex-col items-center gap-3">
+          <div className="relative h-[2px] w-[clamp(120px,36vw,160px)] overflow-hidden rounded-full bg-[rgba(229,199,107,0.2)]">
+            <span
+              className="splash-anim gold-fill absolute inset-y-0 left-0 w-full origin-left"
+              style={anim("splash-fill", HOLD_MS / 1000 - 0.2, 0.15, 1, "linear")}
+            />
+          </div>
+
+          <span
+            className="splash-anim text-[9.5px] font-medium uppercase tracking-[0.34em] text-gold-200/60"
+            style={anim("splash-glint", 1.6, 0.9, "infinite", "ease-in-out")}
           >
             Opening your vault
-          </motion.span>
+          </span>
         </div>
       </div>
     </ScreenTransition>
