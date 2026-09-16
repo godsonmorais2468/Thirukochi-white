@@ -35,11 +35,6 @@ const dateLabel = () =>
     .format(new Date())
     .toUpperCase();
 
-const greetingFor = (hour: number) => {
-  if (hour < 12) return "Good morning";
-  if (hour < 17) return "Good afternoon";
-  return "Good evening";
-};
 
 /** Small label above a figure inside the holdings stack. */
 function Line({
@@ -69,7 +64,9 @@ function Line({
       </span>
       <span className="min-w-0 flex-1">
         <span className="block text-[11px] font-medium tracking-luxe-sm uppercase text-muted">{label}</span>
-        <span className="mt-0.5 block truncate text-[13px] text-muted">{detail}</span>
+        {/* A full step, not a half: at a half the tracked label's box still
+            reached two pixels into the line beneath it. */}
+        <span className="mt-1 block truncate text-[13px] text-muted">{detail}</span>
       </span>
       <span className="shrink-0 font-display text-[16px] text-ink">{value}</span>
     </button>
@@ -87,11 +84,13 @@ export default function HomeTab({ name, onOpenSchemes, onNavigate }: HomeTabProp
       <motion.div variants={dealIn} className="flex flex-wrap items-end justify-between gap-4 px-1">
         <div className="min-w-0">
           <p className="text-[11px] font-medium tracking-luxe uppercase text-gold-700">{dateLabel()}</p>
+          {/* One word, so the name is what the line is about. */}
           <h1 className="mt-1.5 font-display text-[26px] leading-[1.08] text-ink sm:mt-2.5 sm:text-[34px] lg:text-[42px]">
-            {greetingFor(new Date().getHours())},{" "}
-            <span className="text-gold-shimmer">{firstName}</span>
+            Hi, <span className="text-gold-shimmer">{firstName}</span>
           </h1>
-          <p className="mt-1 text-[12.5px] text-muted sm:mt-2 sm:text-[13.5px] lg:text-[14.5px]">
+          {/* 1.08 leading on the line above pulls its descenders into this
+              paragraph's box; the extra step of margin keeps them apart. */}
+          <p className="mt-1.5 text-[12.5px] text-muted sm:mt-2 sm:text-[13.5px] lg:text-[14.5px]">
             Your gold journey continues with trust.
           </p>
         </div>

@@ -369,3 +369,30 @@
     animation: none;
   }
 }
+
+/*
+  PHONES — the decoration budget.
+
+  Every one of these is an infinite loop, and a dashboard carries six or seven
+  of them at once: each holds a promoted layer alive and asks the compositor for
+  work on every frame, including the frames the user needs to scroll. The gold
+  still reads — the gradients, the rules and the blooms are all still drawn —
+  they simply hold still. `text-gold-shimmer` is the worst of them, because it
+  animates a `filter`, which repaints the glyphs rather than compositing them.
+*/
+@media (pointer: coarse) {
+  .glow-breathe,
+  .edge-pulse,
+  .text-gold-shimmer {
+    animation: none;
+    will-change: auto;
+  }
+
+  .glow-breathe {
+    opacity: 0.5;
+  }
+
+  .edge-pulse {
+    opacity: 0.85;
+  }
+}

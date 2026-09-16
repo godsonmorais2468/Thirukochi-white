@@ -124,19 +124,32 @@ export default function GoldJourney({ onExplore, onPay, className = "" }: GoldJo
             {schemeCallout.body}
           </p>
 
-          <div className="mt-2.5 flex flex-row flex-wrap gap-2 sm:mt-6 sm:gap-2.5">
+          {/*
+            One under the other on phones. Both labels are set in tracking
+            uppercase and neither may wrap, so side by side they need about
+            390px of pill — nearly a hundred more than a 320px phone has inside
+            this card, and the text simply ran out through the ends. Full width
+            each, and the same row again from `lg` up — which is where the app
+            leaves the phone frame and the card finally has that width.
+          */}
+          <div className="mt-3 flex flex-col gap-2 sm:mt-6 lg:flex-row lg:flex-wrap lg:gap-2.5">
             <PremiumButton
               layoutId={layout.primaryAction}
               onClick={onExplore}
               block={false}
-              className="flex-1 sm:flex-none"
+              className="w-full lg:w-auto"
               icon={<ArrowRight size={14} strokeWidth={1.9} />}
             >
               {schemeCallout.action}
             </PremiumButton>
 
             {onPay && (
-              <PremiumButton variant="outline" onClick={onPay} block={false} className="flex-1 sm:flex-none">
+              <PremiumButton
+                variant="outline"
+                onClick={onPay}
+                block={false}
+                className="w-full lg:w-auto"
+              >
                 Make a payment
               </PremiumButton>
             )}

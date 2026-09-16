@@ -65,7 +65,7 @@ export default function ActivityFeed({ limit, className = "" }: ActivityFeedProp
             <motion.li
               key={entry.id}
               variants={rise}
-              className="flex items-start gap-2.5 border-b border-line-soft py-2 last:border-b-0 sm:gap-3.5 sm:py-3.5"
+              className="flex items-start gap-3 border-b border-line-soft py-3 last:border-b-0 sm:gap-3.5 sm:py-3.5"
             >
               <span
                 aria-hidden
@@ -79,27 +79,37 @@ export default function ActivityFeed({ limit, className = "" }: ActivityFeedProp
                 <Icon size={14} strokeWidth={1.7} />
               </span>
 
-              {/* One column of text, one of figures — never side by side when cramped */}
-              <span className="flex min-w-0 flex-1 flex-row items-start justify-between gap-3 sm:gap-4">
-                <span className="min-w-0">
-                  <span className="block truncate text-[13px] font-medium text-ink sm:text-[14px]">
+              {/*
+                Three quiet lines instead of two columns fighting over one.
+                The old row gave the figures a column of their own, which left
+                the account name about forty per cent of a phone to live in —
+                every title arrived truncated, and the amount, the badge and
+                the time stacked up beside it three deep. Now the headline and
+                its figure share the top line, the detail gets the full width
+                underneath, and the status and the time sit together on a third
+                line where neither has to be read past anything.
+              */}
+              <span className="flex min-w-0 flex-1 flex-col gap-1">
+                <span className="flex items-baseline justify-between gap-3">
+                  <span className="min-w-0 flex-1 truncate text-[13.5px] font-medium text-ink sm:text-[14.5px]">
                     {entry.title}
                   </span>
-                  <span className="mt-0.5 block truncate text-[12px] text-muted sm:text-[13px]">
-                    {entry.detail}
-                  </span>
-                </span>
-
-                <span className="flex shrink-0 flex-col items-end gap-0.5 sm:gap-1.5">
                   {entry.amount !== undefined && (
                     <span
-                      className={`font-display text-[13.5px] leading-none sm:text-[15px] ${
+                      className={`shrink-0 font-display text-[14px] leading-none sm:text-[15px] ${
                         pending ? "text-muted" : "text-ink"
                       }`}
                     >
                       +{formatRupees(entry.amount)}
                     </span>
                   )}
+                </span>
+
+                <span className="block truncate text-[12px] leading-snug text-muted sm:text-[13px]">
+                  {entry.detail}
+                </span>
+
+                <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
                   <StatusBadge status={entry.status} />
                   <span className="text-[11px] text-muted-soft sm:text-[12px]">{entry.time}</span>
                 </span>

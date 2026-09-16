@@ -152,7 +152,7 @@ export default function PaymentsTab({ onNavigate }: PaymentsTabProps) {
                 >
                   <span
                     aria-hidden
-                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gold-50 text-gold-700 transition-transform duration-400 group-hover:scale-105 sm:h-10 sm:w-10"
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gold-50 text-gold-700 transition-transform duration-400 group-hover:scale-105 sm:h-10 sm:w-10"
                     style={{ border: "1px solid rgba(212,175,55,0.35)" }}
                   >
                     <Check size={15} strokeWidth={2.2} />
@@ -160,16 +160,28 @@ export default function PaymentsTab({ onNavigate }: PaymentsTabProps) {
 
                   <span className="min-w-0 flex-1">
                     <span className="flex items-center gap-2">
-                      <span className="truncate text-[14.5px] font-medium text-ink">{entry.scheme}</span>
-                      <StatusBadge status={entry.status} className="hidden sm:inline-flex" />
+                      <span className="truncate text-[14px] font-medium text-ink sm:text-[14.5px]">
+                        {entry.scheme}
+                      </span>
+                      {/*
+                        Wrapped rather than given `hidden` of its own: the badge
+                        sets `inline-flex` inside its own component, and the two
+                        display utilities cancel out — which is why every phone
+                        row was carrying a badge it was supposed to drop, and
+                        why the scheme name was truncated to "Kanaka…".
+                      */}
+                      <span className="hidden lg:inline-flex">
+                        <StatusBadge status={entry.status} />
+                      </span>
                     </span>
-                    <span className="mt-0.5 block truncate text-[13px] text-muted">
-                      {entry.date} · {entry.method} · {entry.id}
+                    <span className="mt-0.5 block truncate text-[12.5px] text-muted sm:text-[13px]">
+                      {entry.date} · {entry.method}
+                      <span className="hidden lg:inline"> · {entry.id}</span>
                     </span>
                   </span>
 
                   <span className="shrink-0 text-right">
-                    <span className="block font-display text-[16px] leading-none text-ink">
+                    <span className="block font-display text-[15px] leading-none text-ink sm:text-[16px]">
                       {formatRupees(entry.amount)}
                     </span>
                     <span className="mt-1 block text-[12px] text-muted">{formatGrams(entry.grams)}</span>

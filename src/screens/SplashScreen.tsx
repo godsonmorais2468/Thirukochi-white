@@ -8,8 +8,12 @@ interface SplashScreenProps {
   onDone: () => void;
 }
 
-/** How long the opening runs before the app takes over. */
-const HOLD_MS = 3000;
+/**
+ * How long the opening runs before the app takes over. Short enough that a
+ * returning customer never waits on it — every beat below is timed to land
+ * inside it, so the screen is never caught mid-thought when it leaves.
+ */
+const HOLD_MS = 1900;
 
 /** Where the white ground hands over to the burgundy one. */
 const SEAM = "46%";
@@ -112,7 +116,7 @@ export default function SplashScreen({ onDone }: SplashScreenProps) {
         }}
         initial={reduced ? false : { y: "100%" }}
         animate={{ y: 0 }}
-        transition={{ duration: 1.15, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ duration: 0.86, ease: [0.22, 1, 0.36, 1] }}
       >
         <span aria-hidden className="grain absolute inset-0 opacity-[0.07]" />
 
@@ -159,7 +163,7 @@ export default function SplashScreen({ onDone }: SplashScreenProps) {
           }}
           initial={reduced ? false : { scaleX: 0 }}
           animate={{ scaleX: 1 }}
-          transition={{ duration: 1.1, delay: 0.5, ease: ease.silk }}
+          transition={{ duration: 0.8, delay: 0.26, ease: ease.silk }}
         />
       </div>
 
@@ -182,7 +186,7 @@ export default function SplashScreen({ onDone }: SplashScreenProps) {
             }}
             initial={reduced ? false : { opacity: 0, scale: scale * 0.9 }}
             animate={{ opacity: 1, scale }}
-            transition={{ duration: 1.6, delay: 0.7 + index * 0.18, ease: ease.silk }}
+            transition={{ duration: 1.1, delay: 0.4 + index * 0.11, ease: ease.silk }}
           />
         ))}
       </div>
@@ -193,14 +197,14 @@ export default function SplashScreen({ onDone }: SplashScreenProps) {
         className="pointer-events-none absolute inset-x-0 top-[clamp(58px,11vh,104px)] -z-10 flex items-center justify-center gap-3"
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.9, delay: 0.85, ease: ease.silk }}
+        transition={{ duration: 0.6, delay: 0.46, ease: ease.silk }}
       >
         <motion.span
           className="h-px origin-right bg-[rgba(176,141,40,0.45)]"
           style={{ width: "clamp(44px,14vw,72px)" }}
           initial={reduced ? false : { scaleX: 0 }}
           animate={{ scaleX: 1 }}
-          transition={{ duration: 0.9, delay: 1, ease: ease.silk }}
+          transition={{ duration: 0.62, delay: 0.54, ease: ease.silk }}
         />
         {/* No `rotate-45` class here: Tailwind writes the `rotate` property,
             which stacks with the rotation Framer animates and squares it off. */}
@@ -212,14 +216,14 @@ export default function SplashScreen({ onDone }: SplashScreenProps) {
           }}
           initial={reduced ? false : { scale: 0, rotate: 0 }}
           animate={{ scale: 1, rotate: 45 }}
-          transition={{ ...spring.press, delay: 1.05 }}
+          transition={{ ...spring.press, delay: 0.6 }}
         />
         <motion.span
           className="h-px origin-left bg-[rgba(176,141,40,0.45)]"
           style={{ width: "clamp(44px,14vw,72px)" }}
           initial={reduced ? false : { scaleX: 0 }}
           animate={{ scaleX: 1 }}
-          transition={{ duration: 0.9, delay: 1, ease: ease.silk }}
+          transition={{ duration: 0.62, delay: 0.54, ease: ease.silk }}
         />
       </motion.div>
 
@@ -229,7 +233,7 @@ export default function SplashScreen({ onDone }: SplashScreenProps) {
         className="pointer-events-none absolute -left-6 top-6 -z-10 h-[150px] w-[120px] sm:h-[190px] sm:w-[150px]"
         initial={{ opacity: 0, rotate: -10, y: -8 }}
         animate={{ opacity: 1, rotate: 0, y: 0 }}
-        transition={{ duration: 1.2, delay: 0.35, ease: ease.silk }}
+        transition={{ duration: 0.85, delay: 0.16, ease: ease.silk }}
       >
         <LeafSprig className="h-full w-full" />
       </motion.div>
@@ -238,7 +242,7 @@ export default function SplashScreen({ onDone }: SplashScreenProps) {
         className="pointer-events-none absolute -right-6 top-6 -z-10 h-[150px] w-[120px] -scale-x-100 sm:h-[190px] sm:w-[150px]"
         initial={{ opacity: 0, rotate: 10, y: -8 }}
         animate={{ opacity: 1, rotate: 0, y: 0 }}
-        transition={{ duration: 1.2, delay: 0.45, ease: ease.silk }}
+        transition={{ duration: 0.85, delay: 0.22, ease: ease.silk }}
       >
         <LeafSprig className="h-full w-full" />
       </motion.div>
@@ -270,7 +274,7 @@ export default function SplashScreen({ onDone }: SplashScreenProps) {
                 strokeLinecap="round"
                 initial={reduced ? false : { pathLength: 0, opacity: 0 }}
                 animate={{ pathLength: 1, opacity: 1 }}
-                transition={{ duration: 1.5, delay: 0.55, ease: ease.silk }}
+                transition={{ duration: 1, delay: 0.3, ease: ease.silk }}
               />
               {[0, 90, 180, 270].map((angle, index) => (
                 <motion.line
@@ -285,10 +289,42 @@ export default function SplashScreen({ onDone }: SplashScreenProps) {
                   transform={`rotate(${angle} 120 120)`}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  transition={{ duration: 0.4, delay: 0.95 + index * 0.16, ease: ease.silk }}
+                  transition={{ duration: 0.3, delay: 0.56 + index * 0.09, ease: ease.silk }}
                 />
               ))}
             </motion.svg>
+
+            {/*
+              The loader. A short gold arc runs the ring while the app comes
+              up — one element, one compositor-only rotation, and the only
+              thing on the screen that repeats. No Tailwind `rotate` class on
+              it: that property would stack with the one Framer animates.
+            */}
+            {!reduced && (
+              <motion.svg
+                aria-hidden
+                viewBox="0 0 240 240"
+                fill="none"
+                className="absolute h-[clamp(228px,66vw,292px)] w-[clamp(228px,66vw,292px)]"
+                initial={{ opacity: 0, rotate: 0 }}
+                animate={{ opacity: 1, rotate: 360 }}
+                transition={{
+                  opacity: { duration: 0.5, delay: 0.85, ease: ease.silk },
+                  rotate: { duration: 1.6, repeat: Infinity, ease: "linear" },
+                }}
+              >
+                <circle
+                  cx="120"
+                  cy="120"
+                  r="112"
+                  stroke="url(#splash-ring)"
+                  strokeWidth="2.6"
+                  strokeLinecap="round"
+                  /* A 62px stroke on a ~704px circumference: a ninth of the ring. */
+                  strokeDasharray="62 642"
+                />
+              </motion.svg>
+            )}
 
             {/* The pearl plate */}
             <motion.div
@@ -304,13 +340,13 @@ export default function SplashScreen({ onDone }: SplashScreenProps) {
               }}
               initial={reduced ? false : { scale: 0.82, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              transition={{ ...spring.soft, delay: 0.3 }}
+              transition={{ ...spring.soft, delay: 0.1 }}
             >
               <motion.div
                 className="relative"
                 initial={reduced ? false : { opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.9, delay: 0.62, ease: ease.silk }}
+                transition={{ duration: 0.6, delay: 0.3, ease: ease.silk }}
               >
                 <BrandLogo variant="lockup" sizeClass="w-[clamp(138px,40vw,180px)]" width={180} shared />
               </motion.div>
@@ -326,7 +362,7 @@ export default function SplashScreen({ onDone }: SplashScreenProps) {
                   }}
                   initial={{ x: "-180%" }}
                   animate={{ x: "420%" }}
-                  transition={{ duration: 1.3, delay: 1.3, ease: [0.4, 0, 0.2, 1] }}
+                  transition={{ duration: 0.95, delay: 0.66, ease: [0.4, 0, 0.2, 1] }}
                 />
               )}
             </motion.div>
@@ -342,20 +378,20 @@ export default function SplashScreen({ onDone }: SplashScreenProps) {
             className="flex items-center gap-3"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 1.35, ease: ease.silk }}
+            transition={{ duration: 0.5, delay: 0.72, ease: ease.silk }}
           >
             <motion.span
               aria-hidden
               className="h-px bg-[rgba(229,199,107,0.7)]"
               initial={{ width: 0 }}
               animate={{ width: 30 }}
-              transition={{ duration: 0.7, delay: 1.5, ease: ease.silk }}
+              transition={{ duration: 0.5, delay: 0.8, ease: ease.silk }}
             />
             <motion.span
               className="text-[11px] font-medium uppercase text-gold-300"
               initial={{ letterSpacing: "0.04em", opacity: 0 }}
               animate={{ letterSpacing: "0.34em", opacity: 1 }}
-              transition={{ duration: 1.1, delay: 1.45, ease: ease.silk }}
+              transition={{ duration: 0.8, delay: 0.78, ease: ease.silk }}
             >
               Est. Kochi
             </motion.span>
@@ -364,7 +400,7 @@ export default function SplashScreen({ onDone }: SplashScreenProps) {
               className="h-px bg-[rgba(229,199,107,0.7)]"
               initial={{ width: 0 }}
               animate={{ width: 30 }}
-              transition={{ duration: 0.7, delay: 1.5, ease: ease.silk }}
+              transition={{ duration: 0.5, delay: 0.8, ease: ease.silk }}
             />
           </motion.div>
 
@@ -372,20 +408,31 @@ export default function SplashScreen({ onDone }: SplashScreenProps) {
             className="mt-4 text-center text-[12.5px] leading-snug text-gold-200/80"
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 1.62, ease: ease.silk }}
+            transition={{ duration: 0.5, delay: 0.9, ease: ease.silk }}
           >
             Gold held with trust, since the first instalment.
           </motion.p>
         </div>
 
         {/* The thread filling as the opening runs out */}
-        <div className="absolute bottom-[clamp(46px,10vh,84px)] h-px w-[clamp(120px,36vw,160px)] overflow-hidden rounded-full bg-[rgba(229,199,107,0.22)]">
+        <div className="absolute bottom-[clamp(46px,10vh,84px)] flex flex-col items-center gap-3">
+          <div className="relative h-[2px] w-[clamp(120px,36vw,160px)] overflow-hidden rounded-full bg-[rgba(229,199,107,0.22)]">
+            <motion.span
+              className="gold-fill absolute inset-y-0 left-0 w-full origin-left"
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: 1 }}
+              transition={{ duration: reduced ? 0.4 : 1.75, ease: [0.3, 0, 0.2, 1] }}
+            />
+          </div>
+
           <motion.span
-            className="gold-fill absolute inset-y-0 left-0 w-full origin-left"
-            initial={{ scaleX: 0 }}
-            animate={{ scaleX: 1 }}
-            transition={{ duration: reduced ? 0.5 : 2.7, ease: [0.3, 0, 0.2, 1] }}
-          />
+            className="text-[9.5px] font-medium uppercase tracking-[0.34em] text-gold-200/60"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4, delay: 0.95, ease: ease.silk }}
+          >
+            Opening your vault
+          </motion.span>
         </div>
       </div>
     </ScreenTransition>

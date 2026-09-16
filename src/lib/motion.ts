@@ -88,15 +88,20 @@ export const fade: Variants = {
 };
 
 /** Tab to tab: the outgoing panel recedes, the incoming one comes forward. */
+/*
+  Tab to tab: the outgoing panel recedes, the incoming one comes forward. Kept
+  short — this runs before the panel's own contents may begin their stagger, so
+  every millisecond here is a millisecond the tab looks empty.
+*/
 export const tabVariants: Variants = {
-  initial: { opacity: 0, scale: 0.975, x: 16 },
+  initial: { opacity: 0, scale: 0.985, x: 12 },
   animate: {
     opacity: 1,
     scale: 1,
     x: 0,
-    transition: { duration: 0.42, ease: ease.silk },
+    transition: { duration: 0.3, ease: ease.silk },
   },
-  exit: { opacity: 0, scale: 0.99, x: -12, transition: { duration: 0.22, ease: ease.exit } },
+  exit: { opacity: 0, scale: 0.994, x: -10, transition: { duration: 0.16, ease: ease.exit } },
 };
 
 /**
@@ -105,19 +110,24 @@ export const tabVariants: Variants = {
  * place and is what the rest of the app uses.
  */
 export const dealIn: Variants = {
-  initial: { opacity: 0, y: 26, rotate: -1.4, scale: 0.97 },
+  initial: { opacity: 0, y: 18, rotate: -1, scale: 0.98 },
   animate: {
     opacity: 1,
     y: 0,
     rotate: 0,
     scale: 1,
-    transition: { type: "spring", stiffness: 180, damping: 20, mass: 0.9 },
+    transition: { type: "spring", stiffness: 240, damping: 26, mass: 0.8 },
   },
 };
 
+/*
+  The dashboard deals nine panels. At 70ms apart the last one arrived two
+  thirds of a second after the first, which on a phone reads as the page still
+  loading rather than the page arriving.
+*/
 export const bentoStagger: Variants = {
   initial: {},
-  animate: { transition: { staggerChildren: 0.07, delayChildren: 0.05 } },
+  animate: { transition: { staggerChildren: 0.045, delayChildren: 0.03 } },
 };
 
 /** Shared hover/press gestures, so every interactive surface agrees. */

@@ -1,5 +1,6 @@
 import { memo } from "react";
 import { motion, useReducedMotion } from "framer-motion";
+import { useIsTouch } from "../hooks/useMediaQuery";
 
 /**
  * The house set, carried through the whole app. It is the same photograph the
@@ -28,21 +29,29 @@ const motes = Array.from({ length: 7 }, (_, i) => {
 
 function PageBackgroundBase() {
   const reduced = useReducedMotion();
+  /*
+    The set is full-bleed. Drifting it means a viewport-sized texture being
+    composited on every single frame, underneath everything the user is
+    scrolling — the most expensive pixel in the app and the least noticed. On a
+    phone it stays exactly where it is, and the room looks the same.
+  */
+  const touch = useIsTouch();
+  const still = reduced || touch;
 
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden bg-ivory">
       {/* The photograph, drifting very slowly. Scaled past the edge so the
           blur never shows a soft border. */}
       <motion.div
-        className="absolute -inset-[6%] bg-cover will-change-transform sm:hidden"
+        className={`absolute -inset-[6%] bg-cover sm:hidden ${still ? "" : "will-change-transform"}`}
         style={{ backgroundImage: `url(${BG_PORTRAIT})`, backgroundPosition: "50% 62%" }}
-        animate={reduced ? undefined : { x: [0, 14, 0], y: [0, -10, 0] }}
+        animate={still ? undefined : { x: [0, 14, 0], y: [0, -10, 0] }}
         transition={{ duration: 54, repeat: Infinity, repeatType: "mirror", ease: "easeInOut" }}
       />
       <motion.div
-        className="absolute -inset-[6%] hidden bg-cover will-change-transform sm:block"
+        className={`absolute -inset-[6%] hidden bg-cover sm:block ${still ? "" : "will-change-transform"}`}
         style={{ backgroundImage: `url(${BG_LANDSCAPE})`, backgroundPosition: "50% 58%" }}
-        animate={reduced ? undefined : { x: [0, -16, 0], y: [0, 10, 0] }}
+        animate={still ? undefined : { x: [0, -16, 0], y: [0, 10, 0] }}
         transition={{ duration: 62, repeat: Infinity, repeatType: "mirror", ease: "easeInOut" }}
       />
 
@@ -64,7 +73,8 @@ function PageBackgroundBase() {
         }}
       />
 
-      {!reduced &&
+      {/* Seven separately composited specks is six too many for a phone. */}
+      {!still &&
         motes.map((mote, i) => (
           <motion.span
             key={i}

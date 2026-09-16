@@ -31,6 +31,13 @@ interface HomeScreenProps {
 export default function HomeScreen({ name, phone, onSignOut }: HomeScreenProps) {
   const [sheet, setSheet] = useState<Sheet>("none");
   const [tab, setTab] = useState<NavKey>("home");
+  /*
+    Bumped on every navigation, including one that lands on the tab already
+    open. It rides in the panel's key, so the panel remounts and deals its
+    contents in again — asking for a tab you are already on reads as a refresh
+    rather than as a dead press.
+  */
+  const [visit, setVisit] = useState(0);
   const [subscribed, setSubscribed] = useState<{ scheme: string; detail: string } | null>(null);
   const scroller = useRef<HTMLDivElement>(null);
   const toast = useToast();
@@ -38,16 +45,21 @@ export default function HomeScreen({ name, phone, onSignOut }: HomeScreenProps) 
   const isDesktop = useIsDesktop();
   const initial = (name.trim()[0] || "T").toUpperCase();
 
+  const openTab = (next: NavKey) => {
+    setTab(next);
+    setVisit((count) => count + 1);
+  };
+
   // A new tab always opens at its own beginning, never half way down the last one.
   useEffect(() => {
     scroller.current?.scrollTo({ top: 0, behavior: "auto" });
-  }, [tab]);
+  }, [tab, visit]);
 
   return (
     <ScreenTransition className="lg:grid lg:h-full lg:grid-cols-[278px_1fr] xl:grid-cols-[296px_1fr]">
       <DesktopNavigation
         active={tab}
-        onChange={setTab}
+        onChange={openTab}
         onSignOut={onSignOut}
         showLogo={isDesktop}
       />
@@ -57,33 +69,45 @@ export default function HomeScreen({ name, phone, onSignOut }: HomeScreenProps) 
           initial={initial}
           showLogo={!isDesktop}
           onNotifications={() => setSheet("notifications")}
-          onProfile={() => setTab("profile")}
+          onProfile={() => openTab("profile")}
         />
 
         <div
           ref={scroller}
-          className="no-scrollbar scroll-smooth-y min-h-0 flex-1 overflow-y-auto px-4 pb-28 pt-1 sm:px-6 sm:pb-32 lg:px-10 lg:pb-14 lg:pt-2 xl:px-14"
+          /*
+            The dock floats clear of the bottom edge now, so the runway under
+            the content is measured to it: the card is 61px tall, it sits 10px
+            off the edge, and the coin stands 16px proud of its top rule — 87
+            in all, and `pb-24` leaves nine clear of that.
+          */
+          className="no-scrollbar scroll-smooth-y min-h-0 flex-1 overflow-y-auto px-4 pb-24 pt-1 sm:px-6 sm:pb-32 lg:px-10 lg:pb-14 lg:pt-2 xl:px-14"
         >
           <div className="mx-auto w-full max-w-[1180px] 2xl:max-w-[1320px]">
             <AnimatePresence mode="wait">
-              <motion.div key={tab} variants={tabVariants} initial="initial" animate="animate" exit="exit">
+              <motion.div
+                key={`${tab}-${visit}`}
+                variants={tabVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+              >
                 {tab === "home" && (
                   <HomeTab
                     name={name}
                     onOpenSchemes={() => setSheet("schemes")}
-                    onNavigate={setTab}
+                    onNavigate={openTab}
                   />
                 )}
                 {tab === "join" && <JoinSchemeTab onJoined={setSubscribed} />}
-                {tab === "wallet" && <WalletTab onNavigate={setTab} />}
-                {tab === "payments" && <PaymentsTab onNavigate={setTab} />}
+                {tab === "wallet" && <WalletTab onNavigate={openTab} />}
+                {tab === "payments" && <PaymentsTab onNavigate={openTab} />}
                 {tab === "profile" && <ProfileTab name={name} phone={phone} onSignOut={onSignOut} />}
               </motion.div>
             </AnimatePresence>
           </div>
         </div>
 
-        <BottomNavigation active={tab} className="lg:hidden" onChange={setTab} />
+        <BottomNavigation active={tab} className="lg:hidden" onChange={openTab} />
       </div>
 
       <SuccessOverlay
@@ -92,7 +116,7 @@ export default function HomeScreen({ name, phone, onSignOut }: HomeScreenProps) 
         detail={subscribed?.detail}
         onDone={() => {
           setSubscribed(null);
-          setTab("payments");
+          openTab("payments");
           toast({ title: `${subscribed?.scheme ?? "Scheme"} subscribed`, detail: subscribed?.detail });
         }}
       />
@@ -106,7 +130,7 @@ export default function HomeScreen({ name, phone, onSignOut }: HomeScreenProps) 
           <PremiumButton
             onClick={() => {
               setSheet("none");
-              setTab("join");
+              openTab("join");
             }}
           >
             Join a scheme
