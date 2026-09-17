@@ -14,6 +14,16 @@ interface AuthLayoutProps {
   children: ReactNode;
   /** Small print under the card. */
   footnote?: ReactNode;
+  /**
+   * True only for the screen that leaves the auth flow entirely (login →
+   * home). Home's dashboard is heavy enough to mount that a same-frame,
+   * no-op exit can leave this screen fully opaque a beat too long, showing
+   * through the incoming dashboard's translucent cards as a ghost. A real,
+   * short fade guarantees it is on its way to invisible even if removal
+   * lags a frame — every other auth step keeps the instant, animation-free
+   * exit described below.
+   */
+  exitFade?: boolean;
 }
 
 const BG_PORTRAIT = "/brand/login-bg-mobile.jpg";
@@ -68,6 +78,7 @@ export default function AuthLayout({
   backLabel = "Back",
   children,
   footnote,
+  exitFade = false,
 }: AuthLayoutProps) {
   const reduced = useReducedMotion();
 
@@ -102,8 +113,8 @@ export default function AuthLayout({
     <motion.div
       initial={false}
       animate={{ opacity: 1 }}
-      exit={{ opacity: 1 }}
-      transition={{ duration: 0 }}
+      exit={exitFade ? { opacity: 0 } : { opacity: 1 }}
+      transition={exitFade ? { duration: 0.14, ease: ease.exit } : { duration: 0 }}
       className="absolute inset-0 isolate flex flex-col overflow-hidden">
       {/* The set */}
       <div aria-hidden className="absolute inset-0 -z-20">

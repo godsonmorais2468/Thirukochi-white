@@ -10,6 +10,11 @@ export const formatRupeesExact = (value: number) => `₹${inrDecimal.format(valu
 
 export const formatGrams = (value: number) => `${value.toFixed(3)} g`;
 
+export const dateLabel = () =>
+  new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long" })
+    .format(new Date())
+    .toUpperCase();
+
 export const maskPhone = (phone: string) => {
   const digits = phone.replace(/\D/g, "").slice(-10);
   if (digits.length < 10) return phone;

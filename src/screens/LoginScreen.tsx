@@ -27,6 +27,7 @@ export default function LoginScreen({ phone, onLogin }: LoginScreenProps) {
       eyebrow="Welcome back"
       title="Sign in to your vault"
       body="Your number, your MPIN, and the code on the plate."
+      exitFade
       footnote={
         <p className="text-center text-[11.5px] leading-relaxed text-muted">
           Trouble signing in? Visit the boutique and we will help.

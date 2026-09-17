@@ -1,11 +1,15 @@
 import { motion, useReducedMotion } from "framer-motion";
 import { Bell } from "lucide-react";
+import type { ReactNode } from "react";
 import BrandLogo from "./BrandLogo";
 import { spring } from "../lib/motion";
 
 interface TopBarProps {
   initial: string;
   showLogo: boolean;
+  /** Desktop's Home tab hands its greeting up here, in the space the logo
+   *  leaves empty on wide screens — takes over the left slot from `showLogo`. */
+  leading?: ReactNode;
   unread?: boolean;
   onNotifications: () => void;
   onProfile: () => void;
@@ -14,13 +18,15 @@ interface TopBarProps {
 /**
  * No bar any more — the page background runs straight to the top edge. The
  * brand mark sits free at the left on phones (the rail already carries it on
- * desktop, so nothing renders there). Bell and account share one small
- * floating capsule at the top right — the rate now lives only on the gold
- * rate card, so the header stays out of its way.
+ * desktop, so nothing renders there — unless the caller hands in a `leading`
+ * node, e.g. the desktop greeting, which fills that space instead). Bell and
+ * account share one small floating capsule at the top right — the rate now
+ * lives only on the gold rate card, so the header stays out of its way.
  */
 export default function TopBar({
   initial,
   showLogo,
+  leading,
   unread = true,
   onNotifications,
   onProfile,
@@ -29,11 +35,12 @@ export default function TopBar({
 
   return (
     <div className="relative z-30 flex items-center justify-between gap-3 px-4 pt-[max(0.6rem,env(safe-area-inset-top))] pb-2 sm:px-5 sm:pt-[max(0.75rem,env(safe-area-inset-top))] sm:pb-3 lg:px-10 lg:pt-4 lg:pb-2">
-      {showLogo ? (
-        <BrandLogo variant="lockup" tone="ink" width={128} sizeClass="w-[120px] sm:w-[128px]" shared />
-      ) : (
-        <span aria-hidden />
-      )}
+      {leading ??
+        (showLogo ? (
+          <BrandLogo variant="lockup" tone="ink" width={128} sizeClass="w-[120px] sm:w-[128px]" shared />
+        ) : (
+          <span aria-hidden />
+        ))}
 
       <motion.div
         initial={{ opacity: 0, y: -10 }}

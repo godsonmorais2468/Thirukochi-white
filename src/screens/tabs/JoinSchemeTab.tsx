@@ -1,15 +1,14 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { Check, Sparkles } from "lucide-react";
-import { useState } from "react";
+import { Check, ChevronDown, Sparkles } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import GoldBadge from "../../components/GoldBadge";
 import PageHeader from "../../components/PageHeader";
 import PremiumButton from "../../components/PremiumButton";
 import PremiumCard from "../../components/PremiumCard";
 import Checkbox from "../../components/Checkbox";
-import SchemeCard from "../../components/SchemeCard";
 import { formatRupees } from "../../lib/format";
 import { joinScheme, schemes } from "../../data/mock";
-import { ease, rise, spring, stagger, staggerTight } from "../../lib/motion";
+import { ease, rise, spring, stagger } from "../../lib/motion";
 
 interface JoinSchemeTabProps {
   /** Hands the subscription up so the celebration can cover the whole screen. */
@@ -45,6 +44,132 @@ function FieldLabel({ children }: { children: string }) {
 const fieldClass =
   "w-full rounded-2xl border border-line bg-pearl px-4 text-ink caret-wine-700 transition-colors duration-300 focus-within:border-[rgba(212,175,55,0.85)]";
 
+interface SchemeOption {
+  name: string;
+  tenure: string;
+  note: string;
+  minimum: number;
+}
+
+/**
+ * The scheme chooser, collapsed to one field: three full plan cards read as
+ * desktop furniture on a phone. Closed, it states the pick in the same
+ * two-line shape as the house's other fields; open, each option keeps every
+ * detail `SchemeCard` used to show — name, tenure, note, starting price.
+ */
+function SchemeSelect({
+  options,
+  value,
+  onSelect,
+}: {
+  options: SchemeOption[];
+  value: string;
+  onSelect: (name: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const active = options.find((option) => option.name === value);
+
+  useEffect(() => {
+    if (!open) return;
+    const onPointerDown = (event: PointerEvent) => {
+      if (rootRef.current && !rootRef.current.contains(event.target as Node)) setOpen(false);
+    };
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  return (
+    <div ref={rootRef} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((state) => !state)}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        className={`flex h-[60px] items-center justify-between gap-3 text-left ${fieldClass}`}
+      >
+        {active ? (
+          <span className="min-w-0 flex-1">
+            <span className="block truncate font-display text-[15px] text-ink">{active.name}</span>
+            <span className="mt-0.5 block text-[11px] font-medium tracking-luxe-sm uppercase text-gold-700">
+              {active.tenure} · {formatRupees(active.minimum)}/month
+            </span>
+          </span>
+        ) : (
+          <span className="text-[14px] font-normal text-muted-soft">Select a scheme</span>
+        )}
+        <motion.span
+          aria-hidden
+          animate={{ rotate: open ? 180 : 0 }}
+          transition={spring.soft}
+          className="shrink-0 text-gold-600"
+        >
+          <ChevronDown size={18} strokeWidth={1.8} />
+        </motion.span>
+      </button>
+
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: -6, height: 0 }}
+            animate={{ opacity: 1, y: 0, height: "auto" }}
+            exit={{ opacity: 0, y: -6, height: 0 }}
+            transition={{ duration: 0.24, ease: ease.silk }}
+            className="mt-2 overflow-hidden rounded-2xl border border-line bg-pearl shadow-[0_18px_40px_-24px_rgba(68,48,30,0.4)]"
+          >
+            <div role="listbox" aria-label="Select scheme">
+              {options.map((option) => {
+                const selected = option.name === value;
+                return (
+                  <button
+                    key={option.name}
+                    type="button"
+                    role="option"
+                    aria-selected={selected}
+                    onClick={() => {
+                      onSelect(option.name);
+                      setOpen(false);
+                    }}
+                    className={`flex w-full items-start gap-3 border-b border-line-soft px-4 py-3 text-left transition-colors duration-200 last:border-b-0 ${
+                      selected ? "bg-[rgba(212,175,55,0.1)]" : "hover:bg-[rgba(212,175,55,0.05)]"
+                    }`}
+                  >
+                    <span className="min-w-0 flex-1">
+                      <span className="flex items-baseline justify-between gap-2">
+                        <span className="font-display text-[14.5px] text-ink">{option.name}</span>
+                        <span className="shrink-0 text-[12.5px] text-muted">{formatRupees(option.minimum)}/mo</span>
+                      </span>
+                      <span className="mt-0.5 block text-[11px] font-medium tracking-luxe-sm uppercase text-gold-700">
+                        {option.tenure}
+                      </span>
+                      <span className="mt-1 block text-[12px] leading-snug text-muted">{option.note}</span>
+                    </span>
+                    {selected && (
+                      <span
+                        aria-hidden
+                        className="gold-fill mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full"
+                      >
+                        <Check size={11} strokeWidth={3} className="text-wine-900" />
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 export default function JoinSchemeTab({ onJoined }: JoinSchemeTabProps) {
   const [scheme, setScheme] = useState("");
   const [amount, setAmount] = useState("");
@@ -53,6 +178,11 @@ export default function JoinSchemeTab({ onJoined }: JoinSchemeTabProps) {
   const [nomineeName, setNomineeName] = useState("");
   const [remarks, setRemarks] = useState("");
   const [agreed, setAgreed] = useState(false);
+
+  const schemeOptions: SchemeOption[] = schemes.map((option) => ({
+    ...option,
+    tenure: joinScheme.tenures[option.name] ?? option.tenure,
+  }));
 
   const amountValue = Number(amount.replace(/\D/g, ""));
   /* Prototype: nothing is required, but a filled form still reads as ready. */
@@ -92,21 +222,13 @@ export default function JoinSchemeTab({ onJoined }: JoinSchemeTabProps) {
           <motion.section variants={rise}>
             <StepMark index={1} label="Choose your scheme" required />
 
-            <motion.div
-              variants={staggerTight}
-              role="radiogroup"
-              aria-label="Select scheme"
-              className="mt-3 grid gap-2.5 sm:mt-4 sm:grid-cols-2 sm:gap-3 lg:grid-cols-3"
-            >
-              {schemes.map((option) => (
-                <SchemeCard
-                  key={option.name}
-                  scheme={{ ...option, tenure: joinScheme.tenures[option.name] ?? option.tenure }}
-                  selected={scheme === option.name}
-                  onSelect={() => setScheme(option.name)}
-                />
-              ))}
-            </motion.div>
+            <div className="mt-3 sm:mt-4">
+              <SchemeSelect
+                options={schemeOptions}
+                value={scheme}
+                onSelect={setScheme}
+              />
+            </div>
           </motion.section>
 
           {/* Step 2 — the amount */}

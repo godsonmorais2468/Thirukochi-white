@@ -15,14 +15,9 @@ export default function App() {
   const [screen, setScreen] = useState<Screen>("splash");
   const [account, setAccount] = useState<Account>(emptyAccount);
 
-  const reset = () => {
-    setScreen("splash");
-    setAccount(emptyAccount);
-  };
-
   return (
     <MotionConfig reducedMotion="user">
-      <AppShell onReset={reset}>
+      <AppShell>
         {/* No `mode` here: screens overlap briefly so the logo can morph across them. */}
         <AnimatePresence initial={false}>
           {screen === "splash" && <SplashScreen key="splash" onDone={() => setScreen("registration")} />}

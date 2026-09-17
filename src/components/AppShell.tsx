@@ -2,22 +2,19 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import PageBackground from "./PageBackground";
 import ToastStack from "./Toast";
-import ResetDemo from "./ResetDemo";
 import { ToastContext } from "../hooks/useToasts";
 import type { ToastInput } from "../hooks/useToasts";
 import type { ToastMessage } from "../types";
 
 interface AppShellProps {
   children: ReactNode;
-  onReset: () => void;
 }
 
 /**
  * The frame: full-bleed on phones, a seated device on tablet previews, the
- * whole viewport from lg up. Hosts the atmosphere, the toast stack and the
- * demo reset.
+ * whole viewport from lg up. Hosts the atmosphere and the toast stack.
  */
-export default function AppShell({ children, onReset }: AppShellProps) {
+export default function AppShell({ children }: AppShellProps) {
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const nextId = useRef(1);
 
@@ -64,7 +61,6 @@ export default function AppShell({ children, onReset }: AppShellProps) {
             {children}
           </div>
           <ToastStack toasts={toasts} />
-          <ResetDemo onReset={onReset} />
         </div>
       </div>
     </ToastContext.Provider>

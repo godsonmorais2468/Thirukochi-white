@@ -19,7 +19,7 @@ import PromotionCard from "../../components/PromotionCard";
 import QuickAction from "../../components/QuickAction";
 import ReferralCard from "../../components/ReferralCard";
 import RollingNumber from "../../components/RollingNumber";
-import { formatGrams, formatRupees } from "../../lib/format";
+import { dateLabel, formatGrams, formatRupees } from "../../lib/format";
 import { payments, wallet } from "../../data/mock";
 import { bentoStagger, dealIn, staggerTight } from "../../lib/motion";
 import type { NavKey } from "../../lib/nav";
@@ -29,12 +29,6 @@ interface HomeTabProps {
   onOpenSchemes: () => void;
   onNavigate: (key: NavKey) => void;
 }
-
-const dateLabel = () =>
-  new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long" })
-    .format(new Date())
-    .toUpperCase();
-
 
 /** Small label above a figure inside the holdings stack. */
 function Line({
@@ -78,8 +72,14 @@ export default function HomeTab({ name, onOpenSchemes, onNavigate }: HomeTabProp
 
   return (
     <motion.div variants={bentoStagger} initial="initial" animate="animate" className="flex flex-col gap-3 sm:gap-4 lg:gap-5">
-      {/* Greeting rides on the set itself, with no plate under it */}
-      <motion.div variants={dealIn} className="flex flex-wrap items-end justify-between gap-4 px-1">
+      {/*
+        Greeting rides on the set itself, with no plate under it. On desktop
+        it moves up into the top bar, parallel with the bell and account
+        capsule, so the dashboard's own content starts right under it instead
+        of a second, taller header repeating it below — see `HomeScreen`'s
+        `greeting` prop to `TopBar`.
+      */}
+      <motion.div variants={dealIn} className="flex flex-wrap items-end justify-between gap-4 px-1 lg:hidden">
         <div className="min-w-0">
           <p className="text-[11px] font-medium tracking-luxe uppercase text-gold-700">{dateLabel()}</p>
           {/* One word, so the name is what the line is about. */}

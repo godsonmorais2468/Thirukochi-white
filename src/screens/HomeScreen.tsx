@@ -17,6 +17,7 @@ import ProfileTab from "./tabs/ProfileTab";
 import { useIsDesktop } from "../hooks/useMediaQuery";
 import { useToast } from "../hooks/useToasts";
 import { joinScheme, notifications, schemes } from "../data/mock";
+import { dateLabel } from "../lib/format";
 import { staggerTight, tabVariants } from "../lib/motion";
 import type { NavKey } from "../lib/nav";
 
@@ -68,6 +69,16 @@ export default function HomeScreen({ name, phone, onSignOut }: HomeScreenProps) 
         <TopBar
           initial={initial}
           showLogo={!isDesktop}
+          leading={
+            isDesktop && tab === "home" ? (
+              <div className="min-w-0">
+                <p className="text-[12px] font-medium tracking-luxe uppercase text-gold-700">{dateLabel()}</p>
+                <h1 className="mt-1 font-display text-[34px] leading-none text-ink">
+                  Hi, <span className="text-gold-shimmer">{(name.trim().split(" ")[0] || "there")}</span>
+                </h1>
+              </div>
+            ) : undefined
+          }
           onNotifications={() => setSheet("notifications")}
           onProfile={() => openTab("profile")}
         />
